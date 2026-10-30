@@ -2,6 +2,31 @@
 
 All notable changes to the **FORGE & FUEL Matrix** platform are documented here.
 
+## [Phase 2: Insights and Engagement] - 2026-10-30
+
+### 📊 Weekly Summary & Consistency Score
+- **Consistency Score Algorithm** (`src/services/analyticsService.js`):
+  - Weighted composite index: Training Adherence (40%) + Caloric Discipline (30%) + Hydration Target (20%) + Streak Momentum (10%).
+  - Tiers: S-Tier Unstoppable (90-100), A-Tier Dedicated (75-89), B-Tier Consistent (60-74), C-Tier Developing (40-59).
+  - In-app visual breakdown with detailed mathematical formula explainer.
+- **Weekly Performance Summary**: Workouts completed, active training minutes, total lifting volume (kg), and heaviest compound lift.
+- **Email Delivery Service** (`src/services/emailService.js`): Clean provider interface supporting Resend API with mock simulated dispatch fallback, sent email log, and branded HTML report card.
+
+### 📈 Activity Matrix & PR Celebrations
+- **12-Week Activity Heatmap**: 84-day GitHub-style contribution grid displaying daily training frequency, volume, and macro tracking consistency.
+- **Personal Records (PRs) Showcase**: Automated historical best tracking with celebratory animations and fanfare audio cues.
+
+### 🏆 Challenges, Streaks & Badges
+- **7-Day & 30-Day Challenges** (`src/services/challengeService.js`):
+  - *7-Day Iron Discipline* (5 workout sessions)
+  - *7-Day Hydration Titan* (7 consecutive water goal days)
+  - *30-Day Hypertrophy Forge* (20 high-volume workouts)
+  - *30-Day Caloric Precision* (25 on-target nutrition days)
+- **Solo & Friend Invites**: Dynamic invite link generator with Web Share API and 1-click clipboard copy.
+- **Achievement Badges**: *Iron Will*, *Hydration Titan*, *PR Breaker*, *Century Club*, and *Forge Master* with glowing unlocked states.
+
+---
+
 ## [Phase 1: Core Tools] - 2026-10-30
 
 ### 🏋️‍♂️ Workout Builder & Gym Mode

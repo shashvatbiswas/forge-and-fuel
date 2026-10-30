@@ -22,6 +22,9 @@ import { audioCueService } from './services/audioService.js';
 import { foodApiService } from './services/foodApiService.js';
 import { nutritionService, MEAL_TYPES, DAYS_OF_WEEK } from './services/nutritionService.js';
 import { notificationService } from './services/notificationService.js';
+import { analyticsService } from './services/analyticsService.js';
+import { emailService } from './services/emailService.js';
+import { challengeService, ALL_BADGES } from './services/challengeService.js';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const THEMES = [
@@ -339,6 +342,8 @@ class ForgeFuelApp {
       { r: 'tracker',     icon: 'fa-chart-pie',  label: 'Nutrition' },
       { r: 'calculators', icon: 'fa-calculator', label: 'Calculators' },
       { r: 'planner',     icon: 'fa-calendar-week', label: 'Meal Plan' },
+      { r: 'progress',    icon: 'fa-chart-line', label: 'Insights' },
+      { r: 'challenges',  icon: 'fa-trophy',     label: 'Challenges' },
       { r: 'knowledge',   icon: 'fa-book-open',  label: 'Knowledge' },
       { r: 'motivation',  icon: 'fa-bolt',       label: 'Mindset' },
     ];
@@ -401,8 +406,8 @@ class ForgeFuelApp {
       { r: 'home',        icon: 'fa-house',         label: 'Home' },
       { r: 'workouts',    icon: 'fa-dumbbell',      label: 'Train' },
       { r: 'tracker',     icon: 'fa-utensils',      label: 'Macros' },
-      { r: 'calculators', icon: 'fa-calculator',    label: 'Calcs' },
-      { r: 'planner',     icon: 'fa-calendar-week', label: 'Plan' },
+      { r: 'progress',    icon: 'fa-chart-line',    label: 'Insights' },
+      { r: 'challenges',  icon: 'fa-trophy',        label: 'Badges' },
       { r: 'profile',     icon: 'fa-user',          label: 'Profile' },
     ];
     return `
@@ -425,6 +430,8 @@ class ForgeFuelApp {
       case 'calculators': return this.renderCalculators();
       case 'tracker':     return this.renderTracker();
       case 'planner':     return this.renderPlanner();
+      case 'progress':    return this.renderProgress();
+      case 'challenges':  return this.renderChallenges();
       case 'knowledge':   return this.renderKnowledge();
       case 'motivation':  return this.renderMotivation();
       case 'profile':     return this.renderProfile();
@@ -437,6 +444,7 @@ class ForgeFuelApp {
     const u  = this.currentUser;
     const m  = this.getMetrics();
     const td = this.getTodayMacros();
+    const summary = analyticsService.getWeeklySummary(u, workoutService.getLogs(), this.loggedMeals, this.loggedSets, this.waterIntake);
     const caloriesPct = m ? Math.min(100, (td.cals / m.macros.calories) * 100) : 0;
     const proteinPct  = m ? Math.min(100, (td.p   / m.macros.protein)   * 100) : 0;
     const waterPct    = m ? Math.min(100, (this.waterIntake / m.waterGoal) * 100) : 0;
@@ -457,13 +465,13 @@ class ForgeFuelApp {
             <button class="btn btn-primary" onclick="window.app.go('workouts')">
               <i class="fa-solid fa-play"></i> Start Workout
             </button>
-            <button class="btn btn-outline" onclick="window.app.go('tracker')">
-              <i class="fa-solid fa-utensils"></i> Log Nutrition
+            <button class="btn btn-outline" onclick="window.app.go('progress')">
+              <i class="fa-solid fa-chart-line"></i> View Insights
             </button>
           </div>
         </div>
 
-        <!-- Quick Metric Cards -->
+        <!-- Quick Metric Cards (4 Cards) -->
         <div class="metrics-grid">
           <div class="metric-card metric-card-primary">
             <div class="metric-icon"><i class="fa-solid fa-fire-flame-curved"></i></div>
@@ -489,6 +497,15 @@ class ForgeFuelApp {
               <span class="metric-label">Hydration</span>
               <span class="metric-value">${this.waterIntake}ml <small>/ ${m ? m.waterGoal : '—'}ml</small></span>
               <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${waterPct}%;background:#38bdf8"></div></div>
+            </div>
+          </div>
+
+          <div class="metric-card cursor-pointer" onclick="window.app.go('progress')">
+            <div class="metric-icon" style="color:${summary.consistency.color}"><i class="fa-solid fa-medal"></i></div>
+            <div class="metric-body">
+              <span class="metric-label">Consistency</span>
+              <span class="metric-value">${summary.consistency.totalScore} <small>/ 100</small></span>
+              <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${summary.consistency.totalScore}%;background:${summary.consistency.color}"></div></div>
             </div>
           </div>
         </div>
@@ -526,28 +543,28 @@ class ForgeFuelApp {
               <span class="arrow-link">LOG FOOD <i class="fa-solid fa-arrow-right"></i></span>
             </div>
 
-            <div class="program-card cursor-pointer" onclick="window.app.go('calculators')">
+            <div class="program-card cursor-pointer" onclick="window.app.go('progress')">
               <div>
                 <span class="program-number">03</span>
                 <div style="width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;margin:12px 0">
-                  <i class="fa-solid fa-calculator" style="font-size:1.1rem"></i>
+                  <i class="fa-solid fa-chart-line" style="font-size:1.1rem"></i>
                 </div>
-                <h3 class="program-card-title">BMI, BMR & TDEE</h3>
-                <p class="program-card-desc">Metric & Imperial health calculators with tailored caloric guidelines.</p>
+                <h3 class="program-card-title">Insights & Activity Heatmap</h3>
+                <p class="program-card-desc">12-week activity calendar, consistency score formula, and weekly dispatch.</p>
               </div>
-              <span class="arrow-link">CALCULATE <i class="fa-solid fa-arrow-right"></i></span>
+              <span class="arrow-link">VIEW INSIGHTS <i class="fa-solid fa-arrow-right"></i></span>
             </div>
 
-            <div class="program-card cursor-pointer" onclick="window.app.go('planner')">
+            <div class="program-card cursor-pointer" onclick="window.app.go('challenges')">
               <div>
                 <span class="program-number">04</span>
                 <div style="width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;margin:12px 0">
-                  <i class="fa-solid fa-cart-shopping" style="font-size:1.1rem"></i>
+                  <i class="fa-solid fa-trophy" style="font-size:1.1rem"></i>
                 </div>
-                <h3 class="program-card-title">Meal Planner & Groceries</h3>
-                <p class="program-card-desc">Weekly 7-day meal matrix with auto-consolidating grocery checklist.</p>
+                <h3 class="program-card-title">Challenges & Badges</h3>
+                <p class="program-card-desc">7-day & 30-day challenges, invite gym buddies, and unlock achievement badges.</p>
               </div>
-              <span class="arrow-link">VIEW PLAN <i class="fa-solid fa-arrow-right"></i></span>
+              <span class="arrow-link">JOIN ARENA <i class="fa-solid fa-arrow-right"></i></span>
             </div>
           </div>
         </section>
@@ -1656,6 +1673,360 @@ class ForgeFuelApp {
     nutritionService.clearCheckedGroceryItems();
     this.showToast('Cleared checked grocery items.');
     this.render();
+  }
+
+  // ═════════════════════════════════════════════════════════════════════════════
+  // PHASE 2: INSIGHTS, WEEKLY REPORT, ACTIVITY HEATMAP & CHALLENGES
+  // ═════════════════════════════════════════════════════════════════════════════
+
+  // ─────────────────────────── PROGRESS & INSIGHTS VIEW ───────────────────────
+  renderProgress() {
+    const summary = analyticsService.getWeeklySummary(
+      this.currentUser,
+      workoutService.getLogs(),
+      this.loggedMeals,
+      this.loggedSets,
+      this.waterIntake
+    );
+    const heatmapDays = analyticsService.generateActivityHeatmap(workoutService.getLogs(), this.loggedSets);
+    const prs = workoutService.personalRecords;
+    const prList = Object.values(prs);
+
+    return `
+      <div class="view-container animate-fade-in">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow"><span class="eyebrow-dot"></span> Performance Matrix</p>
+            <h1 class="page-title">Progress & Consistency Insights</h1>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="window.app.promptSendReportEmail()">
+            <i class="fa-solid fa-paper-plane"></i> Email Weekly Report
+          </button>
+        </div>
+
+        <!-- Weekly Summary Report Cards -->
+        <div class="metrics-grid" style="margin-bottom:24px">
+          <div class="metric-card metric-card-primary">
+            <div class="metric-icon"><i class="fa-solid fa-medal"></i></div>
+            <div class="metric-body">
+              <span class="metric-label">Consistency Score</span>
+              <span class="metric-value">${summary.consistency.totalScore} <small>/ 100</small></span>
+              <span class="badge" style="background:${summary.consistency.color}22;color:${summary.consistency.color};margin-top:4px;font-weight:700">
+                ${summary.consistency.tier}
+              </span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-icon" style="color:var(--color-primary)"><i class="fa-solid fa-dumbbell"></i></div>
+            <div class="metric-body">
+              <span class="metric-label">Volume Lifted</span>
+              <span class="metric-value">${summary.totalVolumeKg.toLocaleString()} <small>kg</small></span>
+              <span class="text-muted text-xs">${summary.workoutsCompleted} sessions completed</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-icon" style="color:#10b981"><i class="fa-solid fa-stopwatch"></i></div>
+            <div class="metric-body">
+              <span class="metric-label">Active Time</span>
+              <span class="metric-value">${summary.totalActiveMinutes} <small>mins</small></span>
+              <span class="text-muted text-xs">This week</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-icon" style="color:#f59e0b"><i class="fa-solid fa-trophy"></i></div>
+            <div class="metric-body">
+              <span class="metric-label">Best Compound Lift</span>
+              <span class="metric-value">${summary.bestLift.weight} <small>kg</small></span>
+              <span class="text-muted text-xs">${summary.bestLift.reps} reps · ${summary.bestLift.exercise}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Consistency Score Formula Breakdown -->
+        <div class="grid-2" style="margin-bottom:28px">
+          <div class="consistency-score-card">
+            <div class="flex justify-between items-center">
+              <h3 style="font-family:var(--font-heading);font-size:1.4rem;color:var(--color-white)">
+                <i class="fa-solid fa-chart-pie" style="color:var(--color-primary)"></i> Consistency Breakdown
+              </h3>
+              <span class="badge badge-primary">${summary.consistency.tier}</span>
+            </div>
+
+            <!-- 4 Weighted Components -->
+            <div class="consistency-bar-row">
+              <div class="consistency-bar-header">
+                <span>Workout Adherence (40%)</span>
+                <strong>${summary.consistency.breakdown.training.score} / 40 pts</strong>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width:${(summary.consistency.breakdown.training.score / 40) * 100}%;background:var(--color-primary)"></div>
+              </div>
+            </div>
+
+            <div class="consistency-bar-row">
+              <div class="consistency-bar-header">
+                <span>Caloric Discipline (30%)</span>
+                <strong>${summary.consistency.breakdown.nutrition.score} / 30 pts</strong>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width:${(summary.consistency.breakdown.nutrition.score / 30) * 100}%;background:#10b981"></div>
+              </div>
+            </div>
+
+            <div class="consistency-bar-row">
+              <div class="consistency-bar-header">
+                <span>Hydration Target (20%)</span>
+                <strong>${summary.consistency.breakdown.hydration.score} / 20 pts</strong>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width:${(summary.consistency.breakdown.hydration.score / 20) * 100}%;background:#38bdf8"></div>
+              </div>
+            </div>
+
+            <div class="consistency-bar-row">
+              <div class="consistency-bar-header">
+                <span>Streak Momentum (10%)</span>
+                <strong>${summary.consistency.breakdown.momentum.score} / 10 pts</strong>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width:${(summary.consistency.breakdown.momentum.score / 10) * 100}%;background:#f59e0b"></div>
+              </div>
+            </div>
+
+            <div class="formula-explainer-box">
+              <strong><i class="fa-solid fa-circle-info"></i> How it's calculated:</strong>
+              ${summary.consistency.formulaExplanation}
+            </div>
+          </div>
+
+          <!-- Personal Records & Celebrations -->
+          <div class="calc-card">
+            <div class="flex justify-between items-center">
+              <h3 class="calc-card-title"><i class="fa-solid fa-crown" style="color:#f59e0b"></i> Personal Records (PRs)</h3>
+              <button class="btn btn-outline btn-sm" onclick="window.app.celebratePR()">
+                <i class="fa-solid fa-fire"></i> Celebrate!
+              </button>
+            </div>
+
+            ${prList.length === 0 ? `
+              <div class="empty-state" style="padding:24px">
+                <i class="fa-solid fa-trophy"></i>
+                <p>No PRs logged yet. Finish sets in Gym Mode to detect records automatically!</p>
+              </div>
+            ` : `
+              <div style="display:flex;flex-direction:column;gap:10px;max-height:300px;overflow-y:auto">
+                ${prList.map(pr => {
+                  const ex = exercisesData.find(e => e.id === pr.exerciseId);
+                  return `
+                    <div class="flex justify-between items-center" style="padding:12px;background:rgba(255,255,255,0.03);border:1px solid var(--color-border);border-radius:var(--radius-md)">
+                      <div>
+                        <strong style="color:var(--color-white);font-size:0.95rem">${ex?.name || pr.exerciseId}</strong>
+                        <div class="text-muted text-xs">Estimated 1RM: <span style="color:#f59e0b;font-weight:700">${pr.estimated1RM} kg</span></div>
+                      </div>
+                      <span class="badge badge-primary">${pr.weight}kg × ${pr.reps} reps</span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `}
+          </div>
+        </div>
+
+        <!-- GitHub-Style 12-Week Activity Heatmap -->
+        <div class="heatmap-card">
+          <div class="heatmap-header">
+            <div>
+              <h3 style="font-family:var(--font-heading);font-size:1.3rem;color:var(--color-white)">
+                <i class="fa-solid fa-calendar-days"></i> 12-Week Activity Calendar
+              </h3>
+              <p class="text-muted text-xs">Consistent effort compounds. Every active workout, logged set, and macro tracking day lights up your matrix.</p>
+            </div>
+            <!-- Legend -->
+            <div class="heatmap-legend">
+              <span>Less</span>
+              <div class="heatmap-legend-cell" style="background:rgba(255,255,255,0.05)"></div>
+              <div class="heatmap-legend-cell" style="background:color-mix(in srgb, var(--color-primary) 30%, transparent)"></div>
+              <div class="heatmap-legend-cell" style="background:color-mix(in srgb, var(--color-primary) 55%, transparent)"></div>
+              <div class="heatmap-legend-cell" style="background:color-mix(in srgb, var(--color-primary) 80%, transparent)"></div>
+              <div class="heatmap-legend-cell" style="background:var(--color-primary)"></div>
+              <span>More</span>
+            </div>
+          </div>
+
+          <div class="heatmap-grid">
+            ${heatmapDays.map(d => `
+              <div class="heatmap-cell" data-level="${d.level}"
+                title="${d.date} (${d.dayName}): ${d.count} actions logged">
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  promptSendReportEmail() {
+    const email = prompt('Enter your email for weekly performance dispatch:', this.currentUser?.email || '');
+    if (!email || !email.includes('@')) return;
+
+    const summary = analyticsService.getWeeklySummary(
+      this.currentUser,
+      workoutService.getLogs(),
+      this.loggedMeals,
+      this.loggedSets,
+      this.waterIntake
+    );
+
+    emailService.sendWeeklyReport(email, summary).then(res => {
+      this.triggerConfetti();
+      this.showToast(`Weekly Report dispatched to ${email}! 📬 (${res.provider.toUpperCase()} Provider)`);
+    });
+  }
+
+  celebratePR() {
+    audioCueService.playVictory();
+    this.triggerConfetti();
+    this.showToast('🔥 CELEBRATING YOUR GAINS! Keep smashing PRs!');
+  }
+
+  // ─────────────────────────── CHALLENGES & BADGES VIEW ───────────────────────
+  renderChallenges() {
+    const challenges = challengeService.getChallenges();
+    const badges = challengeService.getUserBadges();
+
+    return `
+      <div class="view-container animate-fade-in">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow"><span class="eyebrow-dot"></span> Arena & Accolades</p>
+            <h1 class="page-title">Challenges, Streaks & Badges</h1>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="badge badge-primary" style="font-size:0.85rem;padding:6px 14px">
+              <i class="fa-solid fa-fire"></i> ${this.currentUser?.streakDays || 5} DAY STREAK
+            </span>
+          </div>
+        </div>
+
+        <!-- Challenges Grid -->
+        <h2 style="font-family:var(--font-heading);font-size:1.5rem;color:var(--color-white);margin-bottom:14px">
+          Active & Available Challenges
+        </h2>
+
+        <div class="grid-2" style="margin-bottom:32px">
+          ${challenges.map(c => {
+            const pct = Math.min(100, Math.round((c.progress / c.target) * 100));
+            return `
+              <div class="challenge-card">
+                <div>
+                  <div class="challenge-header">
+                    <span class="badge badge-primary">${c.durationDays}-DAY CHALLENGE</span>
+                    <span class="badge badge-outline"><i class="fa-solid fa-users"></i> ${c.participantsCount} athletes</span>
+                  </div>
+                  <h3 style="font-family:var(--font-heading);font-size:1.4rem;color:var(--color-white);margin-top:10px">
+                    <i class="fa-solid ${c.icon}" style="color:var(--color-primary)"></i> ${c.title}
+                  </h3>
+                  <p class="text-muted text-sm" style="margin:6px 0 16px 0">${c.description}</p>
+
+                  <!-- Progress Bar -->
+                  <div class="flex justify-between text-xs text-muted" style="margin-bottom:6px">
+                    <span>Progress: <strong>${c.progress} / ${c.target}</strong></span>
+                    <span>${pct}%</span>
+                  </div>
+                  <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width:${pct}%;background:${c.isJoined ? 'var(--color-primary)' : 'var(--color-muted)'}"></div>
+                  </div>
+                </div>
+
+                <div class="flex gap-2" style="border-top:1px solid var(--color-border);padding-top:14px">
+                  ${c.isJoined ? `
+                    <button class="btn btn-outline btn-sm" style="flex:1" onclick="window.app.advanceChallenge('${c.id}')">
+                      <i class="fa-solid fa-plus"></i> Log Progress
+                    </button>
+                    <button class="btn btn-primary btn-sm" style="flex:1" onclick="window.app.inviteFriends('${c.id}')">
+                      <i class="fa-solid fa-share-nodes"></i> Invite Friends
+                    </button>
+                  ` : `
+                    <button class="btn btn-primary btn-sm w-full" onclick="window.app.joinChallenge('${c.id}')">
+                      <i class="fa-solid fa-user-plus"></i> Join Challenge
+                    </button>
+                  `}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <!-- Badges & Achievements Showcase -->
+        <div class="calc-card">
+          <div class="flex justify-between items-center" style="margin-bottom:16px">
+            <div>
+              <h2 class="calc-card-title"><i class="fa-solid fa-award" style="color:var(--color-secondary)"></i> Unlockable Badges</h2>
+              <p class="text-muted text-xs">Earn badges by hitting consistency milestones, conquering challenges, and setting new PRs.</p>
+            </div>
+            <span class="badge badge-outline">${badges.filter(b=>b.unlocked).length} / ${badges.length} Unlocked</span>
+          </div>
+
+          <div class="badge-grid">
+            ${badges.map(b => `
+              <div class="badge-card-item ${b.unlocked ? 'unlocked' : 'locked'}">
+                <div class="badge-icon-wrap" style="background:${b.unlocked ? `${b.color}22` : 'rgba(255,255,255,0.05)'};color:${b.unlocked ? b.color : 'var(--color-muted)'}">
+                  <i class="fa-solid ${b.icon}"></i>
+                </div>
+                <strong style="font-size:0.85rem;color:var(--color-white)">${b.name}</strong>
+                <span class="text-muted text-xs">${b.desc}</span>
+                <span class="badge text-xs" style="background:${b.unlocked ? '#10b98122' : 'rgba(255,255,255,0.05)'};color:${b.unlocked ? '#10b981' : 'var(--color-muted)'}">
+                  ${b.unlocked ? 'UNLOCKED' : 'LOCKED'}
+                </span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  joinChallenge(id) {
+    challengeService.joinChallenge(id);
+    this.triggerConfetti();
+    this.showToast('Joined challenge! Let\'s forge greatness! 🔥');
+    this.render();
+  }
+
+  advanceChallenge(id) {
+    const updated = challengeService.incrementProgress(id, 1);
+    if (updated) {
+      if (updated.progress >= updated.target) {
+        audioCueService.playVictory();
+        this.triggerConfetti();
+        this.showToast(`🏆 CHALLENGE COMPLETED: ${updated.title}! Badge unlocked!`);
+      } else {
+        this.showToast(`Progress logged: ${updated.progress}/${updated.target}!`);
+      }
+      this.render();
+    }
+  }
+
+  inviteFriends(id) {
+    const c = challengeService.getChallenges().find(x => x.id === id);
+    if (!c) return;
+    const link = challengeService.generateInviteLink(c);
+
+    if (navigator.share) {
+      navigator.share({
+        title: `Join me on FORGE & FUEL: ${c.title}`,
+        text: `Take on the ${c.title} challenge with me!`,
+        url: link
+      }).catch(() => {});
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(link);
+      this.showToast('Invite link copied to clipboard! Share with your gym buddies 🚀');
+    } else {
+      prompt('Share this invite link with your friends:', link);
+    }
   }
 
   // ─────────────────────────── KNOWLEDGE & MOTIVATION ─────────────────────────
