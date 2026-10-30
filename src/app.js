@@ -337,16 +337,21 @@ class ForgeFuelApp {
     const u = this.currentUser;
     const initials = u ? u.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?';
     const navLinks = [
-      { r: 'home',        icon: 'fa-house',      label: 'Dashboard' },
-      { r: 'workouts',    icon: 'fa-dumbbell',   label: 'Workouts' },
-      { r: 'tracker',     icon: 'fa-chart-pie',  label: 'Nutrition' },
-      { r: 'calculators', icon: 'fa-calculator', label: 'Calculators' },
-      { r: 'planner',     icon: 'fa-calendar-week', label: 'Meal Plan' },
-      { r: 'progress',    icon: 'fa-chart-line', label: 'Insights' },
-      { r: 'challenges',  icon: 'fa-trophy',     label: 'Challenges' },
-      { r: 'knowledge',   icon: 'fa-book-open',  label: 'Knowledge' },
-      { r: 'motivation',  icon: 'fa-bolt',       label: 'Mindset' },
+      { r: 'home',        icon: 'fa-house',         label: 'Dashboard' },
+      { r: 'workouts',    icon: 'fa-dumbbell',      label: 'Workouts' },
+      { r: 'tracker',     icon: 'fa-chart-pie',     label: 'Nutrition' },
+      { r: 'calculators', icon: 'fa-calculator',    label: 'Calculators' },
+      { r: 'planner',     icon: 'fa-calendar-week', label: 'Planner' },
+      { r: 'progress',    icon: 'fa-chart-line',    label: 'Insights' },
+      { r: 'challenges',  icon: 'fa-trophy',        label: 'Challenges' },
     ];
+    // Additional links for mobile drawer
+    const mobileExtraLinks = [
+      { r: 'knowledge',   icon: 'fa-book-open',     label: 'Knowledge' },
+      { r: 'motivation',  icon: 'fa-bolt',          label: 'Mindset' },
+    ];
+    const allLinks = this.isMobileOpen ? [...navLinks, ...mobileExtraLinks] : navLinks;
+
     return `
       <header class="header-wrapper">
         <nav class="navbar">
@@ -356,18 +361,18 @@ class ForgeFuelApp {
           </div>
 
           <div class="navbar-links ${this.isMobileOpen ? 'mobile-open' : ''}">
-            ${navLinks.map(l => `
+            ${allLinks.map(l => `
               <button class="nav-link ${this.route === l.r ? 'active' : ''}" onclick="window.app.go('${l.r}')">
-                <i class="fa-solid ${l.icon}"></i> ${l.label}
+                <i class="fa-solid ${l.icon}"></i> <span>${l.label}</span>
               </button>
             `).join('')}
           </div>
 
           <div class="navbar-actions">
             <div class="theme-dropdown-wrapper">
-              <button class="theme-toggle-btn" onclick="window.app.toggleTheme()" title="Theme">
+              <button class="theme-toggle-btn" onclick="window.app.toggleTheme()" title="Theme: ${t.name}">
                 <span class="theme-dot" style="background:${t.color};box-shadow:0 0 8px ${t.color}"></span>
-                <span class="hidden-xs">${t.name}</span>
+                <span class="theme-name-text">${t.name}</span>
                 <i class="fa-solid fa-chevron-down text-xs"></i>
               </button>
               <div id="theme-popover" class="theme-popover ${this.isThemeOpen ? 'show' : ''}">
@@ -382,9 +387,9 @@ class ForgeFuelApp {
               </div>
             </div>
 
-            <button class="user-avatar-btn" onclick="window.app.go('profile')" title="My Profile">
+            <button class="user-avatar-btn" onclick="window.app.go('profile')" title="My Profile: ${u ? u.name : ''}">
               <div class="user-avatar">${initials}</div>
-              <span class="hidden-xs user-name-nav">${u ? u.name.split(' ')[0] : ''}</span>
+              <span class="user-name-nav">${u ? u.name.split(' ')[0] : ''}</span>
             </button>
 
             <button class="btn-hamburger" onclick="window.app.toggleMobile()" aria-label="Menu">

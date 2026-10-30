@@ -633,9 +633,10 @@ h1, h2, h3, .font-heading {
   position: sticky;
   top: 14px;
   z-index: 1000;
-  max-width: 1180px;
+  max-width: 1320px;
+  width: 100%;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 20px;
   pointer-events: none;
 }
 
@@ -646,13 +647,14 @@ h1, h2, h3, .font-heading {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--color-border-accent);
   border-radius: var(--radius-full);
-  padding: 7px 18px;
+  padding: 6px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.35), 0 0 25px var(--color-primary-glow);
   transition: var(--transition-smooth);
+  width: 100%;
 }
 
 .navbar-brand {
@@ -675,6 +677,7 @@ h1, h2, h3, .font-heading {
   color: #fff;
   font-size: 0.85rem;
   box-shadow: 0 3px 10px var(--color-primary-glow);
+  flex-shrink: 0;
 }
 
 .brand-title {
@@ -683,6 +686,7 @@ h1, h2, h3, .font-heading {
   letter-spacing: 1.5px;
   color: var(--color-white);
   line-height: 1;
+  white-space: nowrap;
 }
 
 .brand-title span { color: var(--color-primary); }
@@ -690,19 +694,21 @@ h1, h2, h3, .font-heading {
 .navbar-links {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .nav-link {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 12px;
+  gap: 5px;
+  padding: 6px 10px;
   border-radius: var(--radius-full);
   color: var(--color-muted);
   font-weight: 700;
-  font-size: 0.76rem;
-  letter-spacing: 0.4px;
+  font-size: 0.72rem;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
   background: transparent;
   border: 1px solid transparent;
@@ -726,24 +732,35 @@ h1, h2, h3, .font-heading {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
-.theme-dropdown-wrapper { position: relative; }
+.theme-dropdown-wrapper { position: relative; flex-shrink: 0; }
 
 .theme-toggle-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 6px 10px;
   border-radius: var(--radius-full);
   background: var(--bg-card);
   border: 1px solid var(--color-border);
   color: var(--color-white);
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 700;
   cursor: pointer;
   transition: var(--transition-fast);
   white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.theme-name-text {
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .theme-toggle-btn:hover {
@@ -801,13 +818,14 @@ h1, h2, h3, .font-heading {
 .user-avatar-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: var(--bg-card);
   border: 1px solid var(--color-border-accent);
   border-radius: var(--radius-full);
-  padding: 4px 12px 4px 4px;
+  padding: 3px 10px 3px 3px;
   cursor: pointer;
   transition: var(--transition-fast);
+  flex-shrink: 0;
 }
 
 .user-avatar-btn:hover {
@@ -830,9 +848,15 @@ h1, h2, h3, .font-heading {
 }
 
 .user-name-nav {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--color-white);
+  max-width: 75px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .btn-hamburger {
@@ -847,9 +871,15 @@ h1, h2, h3, .font-heading {
   color: var(--color-white);
   font-size: 1rem;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
-@media (max-width: 1060px) {
+@media (max-width: 1200px) {
+  .nav-link { padding: 5px 8px; font-size: 0.69rem; gap: 3px; }
+  .theme-name-text { display: none; }
+}
+
+@media (max-width: 1080px) {
   .navbar-links { display: none; }
   .navbar-links.mobile-open {
     display: flex;
@@ -865,7 +895,7 @@ h1, h2, h3, .font-heading {
     gap: 4px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.85);
   }
-  .navbar-links.mobile-open .nav-link { width: 100%; }
+  .navbar-links.mobile-open .nav-link { width: 100%; font-size: 0.85rem; padding: 10px 14px; }
   .btn-hamburger { display: inline-flex; }
   .header-wrapper { position: relative; top: 0; padding: 12px 16px; }
 }
