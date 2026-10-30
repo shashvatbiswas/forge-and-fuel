@@ -1,0 +1,19 @@
+{
+  "name": "forge-and-fuel",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host --port 3000",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "docx": "^9.7.2",
+    "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "canvas-confetti": "^1.9.4"
+  }
+}
