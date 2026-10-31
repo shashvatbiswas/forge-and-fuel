@@ -20,13 +20,14 @@
       font-family: 'Times New Roman', Times, serif;
       color: #000;
       font-size: 10.5pt;
-      line-height: 1.38;
+      line-height: 1.4;
     }
     .page {
       width: 210mm;
+      min-height: 297mm;
       height: 297mm;
       max-height: 297mm;
-      padding: 18mm 20mm 18mm 20mm;
+      padding: 16mm 20mm 26mm 20mm;
       margin: 0 auto 20mm auto;
       background: #ffffff;
       box-shadow: 0 4px 15px rgba(0,0,0,0.15);
@@ -34,6 +35,7 @@
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
+      box-sizing: border-box;
       overflow: hidden;
       page-break-after: always;
       page-break-inside: avoid;
@@ -47,9 +49,10 @@
         box-shadow: none;
         width: 210mm;
         height: 297mm;
+        max-height: 297mm;
         page-break-after: always;
         page-break-inside: avoid;
-        padding: 16mm 18mm 16mm 18mm;
+        padding: 16mm 18mm 26mm 18mm;
       }
       .no-print {
         display: none !important;
@@ -77,7 +80,7 @@
     h2.section-title {
       font-size: 12pt;
       font-weight: bold;
-      margin: 8px 0 3px 0;
+      margin: 10px 0 4px 0;
       color: #000;
       border-bottom: 1px solid #111;
       padding-bottom: 2px;
@@ -85,31 +88,31 @@
     h3.sub-title {
       font-size: 10.5pt;
       font-weight: bold;
-      margin: 6px 0 2px 0;
+      margin: 8px 0 3px 0;
     }
     p {
-      margin: 0 0 5px 0;
+      margin: 0 0 6px 0;
       text-align: justify;
       text-justify: inter-word;
-      line-height: 1.38;
+      line-height: 1.4;
     }
     ul, ol {
-      margin: 2px 0 4px 18px;
+      margin: 2px 0 6px 18px;
       padding: 0;
     }
     li {
-      margin-bottom: 2px;
-      line-height: 1.35;
+      margin-bottom: 3px;
+      line-height: 1.38;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin: 6px 0;
+      margin: 8px 0;
       font-size: 9.5pt;
     }
     th, td {
       border: 1px solid #333;
-      padding: 4px 7px;
+      padding: 5px 8px;
       text-align: left;
     }
     th {
@@ -118,18 +121,19 @@
     }
     .diagram-box {
       background: #fafafa;
-      border: 1px solid #777;
-      padding: 5px 8px;
+      border: 1px solid #666;
+      padding: 6px 10px;
       font-family: 'Courier New', Courier, monospace;
-      font-size: 7.6pt;
+      font-size: 7.2pt;
       line-height: 1.15;
-      margin: 4px 0;
+      margin: 6px 0;
       white-space: pre;
+      overflow-x: auto;
     }
     .toc-row {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 8px;
+      margin-bottom: 9px;
       font-size: 11pt;
     }
     .toc-dots {
@@ -306,62 +310,62 @@
       <div class="toc-row">
         <span><strong>1. Brief Overview of the Project</strong></span>
         <span class="toc-dots"></span>
-        <span>9</span>
+        <span>6</span>
       </div>
       <div class="toc-row">
         <span><strong>2. Background of the Project</strong></span>
         <span class="toc-dots"></span>
-        <span>10</span>
+        <span>6</span>
       </div>
       <div class="toc-row">
         <span><strong>3. Domain / Technology Used</strong></span>
         <span class="toc-dots"></span>
-        <span>11</span>
+        <span>7</span>
       </div>
       <div class="toc-row">
         <span><strong>4. Problem Statement</strong></span>
         <span class="toc-dots"></span>
-        <span>13</span>
+        <span>7</span>
       </div>
       <div class="toc-row">
         <span><strong>5. Objectives and Scope of the Project</strong></span>
         <span class="toc-dots"></span>
-        <span>13</span>
+        <span>8</span>
       </div>
       <div class="toc-row" style="padding-left: 20px;">
-        <span>Objectives</span>
+        <span>5.1 Objectives</span>
         <span class="toc-dots"></span>
-        <span>13</span>
+        <span>8</span>
       </div>
       <div class="toc-row" style="padding-left: 20px;">
-        <span>Scope</span>
+        <span>5.2 Scope</span>
         <span class="toc-dots"></span>
-        <span>14</span>
+        <span>8</span>
       </div>
       <div class="toc-row">
         <span><strong>6. Methodology / Implementation Plan</strong></span>
         <span class="toc-dots"></span>
-        <span>14</span>
+        <span>8</span>
       </div>
       <div class="toc-row" style="padding-left: 20px;">
-        <span>System Design Diagrams</span>
+        <span>6.1 System Design Diagrams</span>
         <span class="toc-dots"></span>
-        <span>16</span>
+        <span>9</span>
       </div>
       <div class="toc-row" style="padding-left: 20px;">
-        <span>Entity-Relationship (ER) Diagram</span>
+        <span>6.2 Entity-Relationship (ER) Diagram</span>
         <span class="toc-dots"></span>
-        <span>18</span>
+        <span>10</span>
       </div>
       <div class="toc-row">
         <span><strong>7. Expected Outcome</strong></span>
         <span class="toc-dots"></span>
-        <span>20</span>
+        <span>10</span>
       </div>
       <div class="toc-row">
         <span><strong>8. Work Plan / Timeline</strong></span>
         <span class="toc-dots"></span>
-        <span>20</span>
+        <span>11</span>
       </div>
     </div>
 
@@ -374,147 +378,183 @@
 
     <div style="font-size: 11pt;">
       <div class="toc-row">
-        <span><strong>Figure 1:</strong> System Architecture and Layered Client-Side Engine</span>
+        <span><strong>Figure 1:</strong> High-Level System Architecture and Layered Client-Side Engine</span>
         <span class="toc-dots"></span>
-        <span>12</span>
+        <span>9</span>
       </div>
       <div class="toc-row">
-        <span><strong>Figure 2:</strong> User Navigation & Client-Side Page Routing Flow</span>
+        <span><strong>Figure 2:</strong> Algorithmic Macronutrient & Metabolic Engine (BMR/TDEE)</span>
         <span class="toc-dots"></span>
-        <span>15</span>
+        <span>9</span>
       </div>
       <div class="toc-row">
-        <span><strong>Figure 3:</strong> Workout Selection and Set Logging Activity Lifecycle</span>
+        <span><strong>Figure 3:</strong> Conceptual Entity-Relationship (ER) Data Schema</span>
         <span class="toc-dots"></span>
-        <span>15</span>
-      </div>
-      <div class="toc-row">
-        <span><strong>Figure 4:</strong> Calorie & Macro Calculation Logic (Mifflin-St Jeor Engine)</span>
-        <span class="toc-dots"></span>
-        <span>17</span>
-      </div>
-      <div class="toc-row">
-        <span><strong>Figure 5:</strong> Entity-Relationship (ER) Conceptual Data Schema</span>
-        <span class="toc-dots"></span>
-        <span>18</span>
-      </div>
-      <div class="toc-row">
-        <span><strong>Figure 6:</strong> LocalStorage Offline Data Persistence Flow</span>
-        <span class="toc-dots"></span>
-        <span>19</span>
-      </div>
-      <div class="toc-row">
-        <span><strong>Figure 7:</strong> HTML5 Canvas 2D Biomechanical Motion Visualizer</span>
-        <span class="toc-dots"></span>
-        <span>21</span>
+        <span>10</span>
       </div>
     </div>
 
     <div class="page-footer">5</div>
   </div>
 
-  <!-- ================= PAGE 6: SECTIONS 1 TO 4 (SIMPLIFIED TERMS) ================= -->
+  <!-- ================= PAGE 6: SECTIONS 1 & 2 ================= -->
   <div class="page">
     <h2 class="section-title">1. Brief Overview of the Project</h2>
     <p class="text-justify">
-      <strong>FORGE & FUEL MATRIX</strong> is an all-in-one fitness and nutrition web application designed to help people manage their daily workouts, track their food intake, and learn proper exercise form in one simple, unified dashboard.
+      <strong>FORGE & FUEL MATRIX</strong> is a unified, high-performance web platform designed to streamline resistance training, biomechanical exercise visualization, precision nutrition planning, and athletic conditioning into an optimized Single Page Application (SPA).
     </p>
     <p class="text-justify">
-      <strong>Purpose:</strong> Many beginners struggle because fitness tools are scattered across different apps (one for calorie counting, one for workouts, and videos for form). FORGE & FUEL solves this by combining scientific calorie calculations, animated exercise form guides, daily meal tracking, and motivational support into a single, clean web application.
+      <strong>Purpose:</strong> Modern fitness enthusiasts often juggle 3 to 4 fragmented apps (one for calorie counting, one for workout tracking, separate video guides, and notes). FORGE & FUEL solves this by coupling scientific metabolic equations with interactive 2D canvas animations, AI-assisted form coaching, natural language logging, and offline local-first storage.
     </p>
     <p><strong>Major Functions:</strong></p>
     <ul>
-      <li><strong>Automatic Calorie & Macro Calculator:</strong> Calculates daily calorie needs (BMR & TDEE) and gives exact grams of Protein, Carbs, and Fats based on the user's goal (Fat Loss, Muscle Gain, or Maintenance).</li>
-      <li><strong>Interactive Exercise Guide with 2D Visualizer:</strong> Displays workouts by muscle group with an animated HTML5 Canvas visualizer showing the correct bar and movement path for lifts like Squats and Bench Press.</li>
-      <li><strong>Daily Diet & Hydration Tracker:</strong> Lets users search foods, log custom meals, track water intake, and view live progress bars toward their daily calorie limits.</li>
-      <li><strong>Fitness Knowledge & Motivation:</strong> Science-backed articles on nutrition and daily mindset quotes.</li>
-      <li><strong>Theme Switcher:</strong> 5 color themes (Cyber Neon, Sapphire Luxury, Crimson, Amber Gold, Arctic Light).</li>
+      <li><strong>Metabolic Engine & Macro Calculator:</strong> Real-time calculation of Mifflin-St Jeor BMR, dynamic TDEE modifiers, and macro splits (Protein, Carbs, Fats) across Cut, Bulk, and Recomposition.</li>
+      <li><strong>Workout Builder & Fullscreen Gym Mode:</strong> Drag-and-drop circuit routine creation with millisecond timer, rest countdowns, and Web Audio API synthesized cues.</li>
+      <li><strong>PR Engine & 84-Day Activity Heatmap:</strong> Epley 1RM formula calculations, automatic personal record celebrations, and weighted Consistency Score index (0–100).</li>
+      <li><strong>AI Coach & NLP Workout Logger:</strong> Biomechanical movement advice, circadian recovery predictions, and regex NLP parsing of unstructured lifting notes.</li>
+      <li><strong>Community Squads & Canvas Share Cards:</strong> Activity feed, mutual kudos, squad volume leaderboards, and 800×1000 story cards exported via Web Share API or PNG.</li>
+      <li><strong>Wearables Sync & Data Portability:</strong> Multi-device biometric sync (Apple Health, Google Fit, Garmin, Fitbit), Spotify BPM matcher, and CSV/.ICS exports.</li>
     </ul>
     <p class="text-justify">
-      <strong>Target Users:</strong> College students, gym beginners, athletes, and personal trainers looking for a fast, free, and distraction-free fitness companion.
+      <strong>Target Users:</strong> University students, fitness enthusiasts, competitive lifters, and personal trainers seeking a high-performance, private, and subscription-free cockpit.
     </p>
     <p class="text-justify">
-      <strong>Expected Contribution:</strong> A lightweight, responsive web app that runs offline in any browser, requires no paid subscriptions, and keeps all personal fitness data safely on the user's device.
+      <strong>Expected Contribution:</strong> A zero-latency, local-first PWA operating completely offline in modern web browsers, eliminating paid subscriptions while maintaining absolute user data sovereignty.
     </p>
 
-    <h2 class="section-title">2. Background of the Project</h2>
+    <h2 class="section-title" style="margin-top: 14px;">2. Background of the Project</h2>
     <p class="text-justify">
-      Maintaining physical health is essential, yet most people find fitness apps frustrating. Commercial mobile apps frequently charge costly monthly subscriptions for basic features like macro counting, show excessive ads, and run slowly over poor gym internet connections. FORGE & FUEL was created to provide a modern, open, and fast web application that works completely in the browser without subscriptions or delays.
-    </p>
-
-    <h2 class="section-title">3. Domain / Technology Used</h2>
-    <p>
-      <strong>Project Domain:</strong> Web Application Development, Health Informatics & Sports Software.<br>
-      <strong>Frontend Technologies:</strong>
-    </p>
-    <ul>
-      <li><strong>HTML5:</strong> Semantic structure for all pages and forms.</li>
-      <li><strong>Vanilla CSS3:</strong> Custom CSS properties (design tokens) for smooth layout, responsive mobile design, and 5 interactive color themes without heavy framework dependencies.</li>
-      <li><strong>JavaScript (ES6 Modules):</strong> Application routing, calorie calculation logic, and reactive UI updates.</li>
-      <li><strong>HTML5 Canvas API:</strong> Real-time 2D animated kinetic drawings demonstrating correct exercise form.</li>
-      <li><strong>Vite 5:</strong> Modern build tool for high-speed local development and optimized deployment.</li>
-      <li><strong>HTML5 LocalStorage:</strong> Client-side storage to save user profiles, logged meals, and workout sets permanently on the device without needing an external database server.</li>
-    </ul>
-
-    <h2 class="section-title">4. Problem Statement</h2>
-    <p class="text-justify">
-      Fitness beginners fail to reach their goals due to three common obstacles: (1) they do not know their daily caloric and protein targets, (2) they risk injuries because static workout images do not explain proper lifting form and movement cadence, and (3) commercial fitness apps are expensive and require continuous high-speed internet. <strong>FORGE & FUEL MATRIX</strong> directly solves this by providing a free, local-first web app that calculates exact dietary targets, visualizes exercise movement paths using animated 2D graphics, and logs daily meals and workouts with zero lag.
+      Maintaining physical health is essential, yet modern fitness apps suffer from severe ecosystem fragmentation and aggressive monetization. Commercial applications lock basic features like macro counting or workout logging behind monthly subscriptions ($15–$30/month), inject disruptive advertisements, and stall over spotty gym connectivity. FORGE & FUEL MATRIX provides an open, science-grounded single-page web platform that works locally with zero server dependence or financial barriers.
     </p>
 
     <div class="page-footer">6</div>
   </div>
 
-  <!-- ================= PAGE 7: SECTIONS 5 & 6 (OBJECTIVES, SCOPE, METHODOLOGY) ================= -->
+  <!-- ================= PAGE 7: SECTIONS 3 & 4 ================= -->
+  <div class="page">
+    <h2 class="section-title">3. Domain / Technology Used</h2>
+    <p>
+      <strong>Project Domain:</strong> Web Application Development, Health Informatics, Sports Biomechanics & Client-Side NLP.<br>
+      <strong>Frontend Technologies & Architecture:</strong>
+    </p>
+    
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 25%;">Layer / Technology</th>
+          <th style="width: 25%;">Component / API</th>
+          <th style="width: 50%;">Implementation Details & Functionality</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Frontend Core</strong></td>
+          <td>HTML5 & ES6+ Modules</td>
+          <td>Semantic layout, modular service layer architecture, reactive view controller.</td>
+        </tr>
+        <tr>
+          <td><strong>UI & Design Tokens</strong></td>
+          <td>Vanilla CSS3 Custom Tokens</td>
+          <td>Responsive grid/flexbox, glassmorphism, 6 high-contrast accessible themes.</td>
+        </tr>
+        <tr>
+          <td><strong>Acoustic Feedback</strong></td>
+          <td>Web Audio API</td>
+          <td>Synthesized zero-dependency audio cues (timer ticks, chimes, victory fanfare).</td>
+        </tr>
+        <tr>
+          <td><strong>Interactive Graphics</strong></td>
+          <td>HTML5 Canvas 2D</td>
+          <td>Procedural 2D kinematic form visualizer and 800×1000 high-res social share cards.</td>
+        </tr>
+        <tr>
+          <td><strong>Language Processing</strong></td>
+          <td>Client-Side Regex NLP</td>
+          <td>Pattern-matching engine extracting exercises, sets, reps, and loads from freeform text.</td>
+        </tr>
+        <tr>
+          <td><strong>Local Persistence</strong></td>
+          <td>HTML5 LocalStorage & PWA</td>
+          <td>Local-first JSON state persistence and Service Worker asset caching for full offline use.</td>
+        </tr>
+        <tr>
+          <td><strong>Data Portability</strong></td>
+          <td>RFC 5545 `.ics` & CSV</td>
+          <td>Unrestricted workout/nutrition CSV exports and calendar schedule synchronization.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 class="section-title" style="margin-top: 16px;">4. Problem Statement</h2>
+    <p class="text-justify">
+      Fitness beginners and athletes fail to sustain progress due to three major challenges: (1) nutritional ambiguity without personalized caloric/protein prescriptions, (2) elevated injury risk caused by poor form visualization and excessive fatigue, and (3) app fatigue caused by paid subscriptions, ads, and network latency in gym basements.
+    </p>
+    <p class="text-justify">
+      <strong>Proposed Solution:</strong> Develop <strong>FORGE & FUEL MATRIX</strong>, an all-in-one, local-first web application that operates instantaneously, integrates rigorous metabolic science (Mifflin-St Jeor BMR, dynamic TDEE modifiers), provides interactive 2D canvas biomechanical animations, and offers complete offline-capable logging of meals, workout sets, and hydration levels without subscription barriers.
+    </p>
+
+    <div class="page-footer">7</div>
+  </div>
+
+  <!-- ================= PAGE 8: SECTIONS 5 & 6 ================= -->
   <div class="page">
     <h2 class="section-title">5. Objectives and Scope of the Project</h2>
     <h3 class="sub-title">5.1 Objectives</h3>
-    <ul style="line-height: 1.35;">
-      <li><strong>O1:</strong> Implement the Mifflin-St Jeor scientific formula to accurately calculate Basal Metabolic Rate (BMR) and Total Daily Energy Expenditure (TDEE) based on user age, gender, height, weight, and activity level.</li>
-      <li><strong>O2:</strong> Build an automated macronutrient calculator that divides total calories into Protein, Carbs, and Fats according to the user's selected fitness goal (Cut, Bulk, or Recomposition).</li>
-      <li><strong>O3:</strong> Develop an animated HTML5 Canvas 2D engine that visually demonstrates correct exercise movement paths for key compound lifts.</li>
-      <li><strong>O4:</strong> Provide a real-time food and water tracking system where users can log meals, add custom items, and watch daily nutritional progress update instantly.</li>
-      <li><strong>O5:</strong> Create a responsive, 5-theme user interface using CSS design tokens that operates smoothly on both mobile phones and desktop computers.</li>
-      <li><strong>O6:</strong> Implement local-first data storage using browser LocalStorage so that all user profiles and logs are saved securely and work offline.</li>
+    <ul>
+      <li><strong>O1:</strong> Implement the Mifflin-St Jeor equation to compute Basal Metabolic Rate (BMR) and Total Daily Energy Expenditure (TDEE) with dynamic macro splits for Cut, Bulk, and Recomposition.</li>
+      <li><strong>O2:</strong> Build a Full-Screen Gym Mode with millisecond-precision timers, rest interval chime countdowns via Web Audio API, and automated Epley 1RM PR detection.</li>
+      <li><strong>O3:</strong> Develop procedural HTML5 Canvas 2D motion visualizers for compound movement kinematics and 800×1000 high-res social workout share cards.</li>
+      <li><strong>O4:</strong> Build a regex-powered client-side Natural Language Processing (NLP) parser to extract exercises, sets, reps, and weights from freeform session notes.</li>
+      <li><strong>O5:</strong> Formulate an algorithmic Consistency Score index (0–100) and an 84-day activity heatmap tracking training adherence and hydration thresholds.</li>
+      <li><strong>O6:</strong> Integrate an athlete social network with squad creation, weekly volume leaderboards, community feed kudos, and peer cheer interactions.</li>
+      <li><strong>O7:</strong> Connect health wearables (Apple Health, Google Fit, Garmin, Fitbit) and acoustic Spotify BPM workout matching with complete CSV and RFC 5545 `.ics` data portability.</li>
     </ul>
 
-    <h3 class="sub-title">5.2 Scope</h3>
+    <h3 class="sub-title" style="margin-top: 12px;">5.2 Scope</h3>
     <p class="text-justify">
-      <strong>What the Project Covers:</strong> Complete biometric user profiling, automated calorie/macro calculations, interactive workout directory with muscle categorization, 2D animated form visualizer, meal and water logging, fitness knowledge articles, motivational quote bookmarks, and 5 color themes.<br>
-      <strong>Exclusions (Future Enhancements):</strong> Bluetooth synchronization with wearable smartwatches (Apple Watch / Fitbit) and multi-device cloud synchronization will be incorporated in Phase 2.
+      <strong>What the Project Covers:</strong> Unified biometric profiling, metabolic engines, circuit routine builder, guided gym mode, 2D kinematic animations, daily diet/water tracking, 84-day activity heatmap, consistency scoring, challenge streaks & badges, social squad leaderboards, AI form coaching & regex NLP parsing, wearable biometric sync, Spotify workout matching, and CSV/.ICS calendar export.<br>
+      <strong>Exclusions (Future Scope):</strong> Computer vision camera tracking for automated rep-counting and server-side multi-user relational DB syncing will be explored in future cloud editions.
     </p>
 
-    <h2 class="section-title">6. Methodology / Implementation Plan</h2>
+    <h2 class="section-title" style="margin-top: 14px;">6. Methodology / Implementation Plan</h2>
     <p class="text-justify">
-      The project follows an <strong>Iterative Agile Methodology</strong>: (1) Formula research & mathematical engine, (2) UI layout & 5-theme token setup, (3) Exercise library with Canvas animations, (4) Diet tracker & LocalStorage integration, and (5) Testing and optimization.
+      The project follows an <strong>Iterative Agile Methodology</strong> across 5 distinct phases: (1) Core Tools & Gym Mode, (2) Insights, Consistency Scoring & Activity Matrix, (3) Social Network & Share Cards, (4) AI Coaching & NLP Parser, and (5) Health Wearables & Data Portability. Each iteration incorporates user testing, automated unit tests, and performance validation.
     </p>
 
+    <div class="page-footer">8</div>
+  </div>
+
+  <!-- ================= PAGE 9: SECTION 6.1 (SYSTEM DESIGN DIAGRAMS) ================= -->
+  <div class="page">
+    <h2 class="section-title">6. Methodology / Implementation Plan (Contd.)</h2>
     <h3 class="sub-title">6.1 System Design Diagrams</h3>
-    <p style="margin-bottom: 2px;"><strong>Figure 1: High-Level System Architecture</strong></p>
+    
+    <p style="margin-bottom: 2px;"><strong>Figure 1: High-Level System Architecture and Layered Client-Side Engine</strong></p>
     <div class="diagram-box">
 ┌────────────────────────────────────────────────────────────────────────┐
 │                        USER INTERFACE LAYER (UI)                       │
-│  [ Home Dashboard ]   [ Workouts Hub ]   [ Diet & Tracker ]   [ Quotes ]
+│  [ Dashboard ]  [ Gym Mode ]  [ Nutrition ]  [ AI Coach ]  [ Squads ]  │
 └────────────────────────────────────┬───────────────────────────────────┘
                                      │
 ┌────────────────────────────────────▼───────────────────────────────────┐
 │                      APPLICATION CONTROLLER & ROUTER                   │
 │         ForgeFuelApp (Manages active view, state, and user events)     │
-└──────────────────┬──────────────────┬──────────────────┬───────────────┘
-                   │                  │                  │
-┌──────────────────▼────────┐ ┌───────▼────────┐ ┌───────▼───────────────┐
-│ COMPUTATIONAL ENGINE      │ │ GRAPHICS ENGINE│ │ STATIC KNOWLEDGE BASE │
-│ • Mifflin-St Jeor BMR     │ │ • HTML5 Canvas │ │ • Exercise Library    │
-│ • TDEE Activity Factor    │ │ • 2D Animation │ │ • Food Calorie DB     │
-│ • Macro Splits (P / C / F)│ │   Trajectory   │ │ • Fitness Articles    │
-└──────────────────┬────────┘ └────────────────┘ └───────────────────────┘
-                   │
-┌──────────────────▼─────────────────────────────────────────────────────┐
+└─────────┬──────────────┬──────────────┬──────────────┬─────────────────┘
+          │              │              │              │
+┌─────────▼────┐ ┌───────▼────┐ ┌───────▼────┐ ┌───────▼────────────────┐
+│ COMPUTATIONS │ │ AI & NLP   │ │ GRAPHICS   │ │ INTEGRATIONS & EXPORTS │
+│ • BMR / TDEE │ │ • Regex NLP│ │ • Form 2D  │ │ • Wearables Sync Hub   │
+│ • Macro Split│ │ • Form Tips│ │ • 800×1000 │ │ • Spotify BPM Matcher  │
+│ • 1RM Epley  │ │ • Recovery │ │   Cards    │ │ • CSV & .ICS Calendar  │
+└─────────┬────┘ └───────┬────┘ └───────┬────┘ └───────┬────────────────┘
+          │              │              │              │
+┌─────────▼──────────────▼──────────────▼──────────────▼────────────────┐
 │                 DATA STORAGE LAYER (Browser LocalStorage)              │
-│       Saved User Profile  •  Logged Meals  •  Workout Sets  •  Theme    │
+│   Profiles  •  Meals  •  Workout Sets  •  Squads  •  Wearable Sync     │
 └────────────────────────────────────────────────────────────────────────┘
     </div>
 
-    <p style="margin-bottom: 2px;"><strong>Figure 4: Calorie & Macro Calculation Flow</strong></p>
+    <p style="margin-top: 14px; margin-bottom: 2px;"><strong>Figure 2: Algorithmic Macronutrient & Metabolic Engine (BMR/TDEE)</strong></p>
     <div class="diagram-box">
 User Inputs: [Age, Gender, Height, Weight, Activity Level, Goal] ──► BMR (Mifflin-St Jeor)
   Male: 10×W + 6.25×H - 5×A + 5   |   Female: 10×W + 6.25×H - 5×A - 161
@@ -526,47 +566,60 @@ TDEE = BMR × Activity Multiplier (1.2 to 1.9) ──► Target = Cut(-20%) / Bu
 Macro Split: High-Protein (40% Protein, 35% Carbs, 25% Fat) / Balanced / Low-Carb
     </div>
 
-    <div class="page-footer">7</div>
+    <div class="page-footer">9</div>
   </div>
 
-  <!-- ================= PAGE 8: ER DIAGRAM, OUTCOME & TIMELINE ================= -->
+  <!-- ================= PAGE 10: SECTIONS 6.2 & 7 ================= -->
   <div class="page">
     <h3 class="sub-title" style="margin-top: 0;">6.2 Entity-Relationship (ER) Diagram</h3>
-    <p style="margin-bottom: 2px;"><strong>Figure 5: Conceptual Entity-Relationship Data Schema</strong></p>
+    <p style="margin-bottom: 2px;"><strong>Figure 3: Conceptual Entity-Relationship (ER) Data Schema</strong></p>
     <div class="diagram-box">
-┌──────────────────────┐          1 to Many          ┌──────────────────────┐
-│     USER_PROFILE     ├────────────────────────────►│     LOGGED_MEAL      │
-├──────────────────────┤                             ├──────────────────────┤
-│ PK  user_id          │                             │ PK  meal_id, user_id │
-│     name, email      │                             │     food_name, cals  │
-│     gender, age      │                             │     protein, carbs   │
-│     height, weight   │          1 to Many          │     fat, timestamp   │
-│     activity_level   ├──────────────────────┐      └──────────────────────┘
-│     fitness_goal     │                      │
-│     daily_water      │                      ▼
-│     active_theme     │             ┌──────────────────────┐   Many to 1    ┌──────────────────────┐
-└──────────────────────┘             │     EXERCISE_SET     ├───────────────►│   EXERCISE_MASTER    │
-                                     ├──────────────────────┤                ├──────────────────────┤
-                                     │ PK  set_id, user_id  │                │ PK  exercise_id      │
-                                     │ FK  exercise_id      │                │     exercise_name    │
-                                     │     weight, reps     │                │     target_muscle    │
-                                     │     timestamp        │                │     instructions     │
-                                     └──────────────────────┘                └──────────────────────┘
+┌──────────────────────┐        1 to Many        ┌──────────────────────┐
+│     USER_PROFILE     ├────────────────────────►│     LOGGED_MEAL      │
+├──────────────────────┤                         ├──────────────────────┤
+│ PK  user_id          │                         │ PK  meal_id, user_id │
+│     name, email      │        1 to Many        │     food_name, cals  │
+│     gender, age      ├───────────────┐         │     protein, carbs   │
+│     height, weight   │               │         │     fat, timestamp   │
+│     activity_level   │               │         └──────────────────────┘
+│     fitness_goal     │               ▼
+│     daily_water      │      ┌──────────────────┐   Many to 1  ┌──────────────────────┐
+│     active_theme     │      │   EXERCISE_SET   ├─────────────►│   EXERCISE_MASTER    │
+└──────────┬───────────┘      ├──────────────────┤              ├──────────────────────┤
+           │                  │ PK set_id        │              │ PK exercise_id       │
+           │ 1 to Many        │ FK exercise_id   │              │    exercise_name     │
+           ├──────────────┐   │    weight, reps  │              │    target_muscle     │
+           │              │   │    timestamp     │              │    instructions      │
+           ▼              ▼   └──────────────────┘              └──────────────────────┘
+┌──────────────────┐ ┌──────────────────┐
+│    TEAM_SQUAD    │ │ CHALLENGE_STREAK │
+├──────────────────┤ ├──────────────────┤
+│ PK team_id       │ │ PK challenge_id  │
+│    team_name     │ │    target_count  │
+│    weekly_volume │ │    streak_days   │
+│    members_count │ │    badge_reward  │
+└──────────────────┘ └──────────────────┘
     </div>
 
-    <h2 class="section-title">7. Expected Outcome</h2>
-    <p class="text-justify" style="font-size: 10pt; margin-bottom: 4px;">
-      The project delivers a fully working, responsive web application that runs smoothly on any browser with the following outcomes:
+    <h2 class="section-title" style="margin-top: 14px;">7. Expected Outcome</h2>
+    <p class="text-justify" style="margin-bottom: 6px;">
+      The project delivers an advanced, production-grade web application running completely in modern web browsers:
     </p>
-    <ul style="line-height: 1.3; font-size: 9.8pt; margin-bottom: 4px;">
-      <li><strong>Immediate Calorie & Macro Prescriptions:</strong> Eliminates guesswork by providing exact daily caloric and macronutrient targets within seconds.</li>
-      <li><strong>Injury Prevention via 2D Animations:</strong> Visualizes movement paths directly in the browser so users can check proper exercise mechanics.</li>
-      <li><strong>Effortless Daily Tracking:</strong> Allows users to log food, water, and workout sets with instant visual progress bars.</li>
-      <li><strong>Zero Cost & Complete Privacy:</strong> Runs without paid subscriptions, keeping all user health data securely in the user's own browser storage.</li>
+    <ul>
+      <li><strong>Immediate Metabolic Prescriptions:</strong> Eliminates guesswork with instant Mifflin-St Jeor BMR, TDEE, and macro splits.</li>
+      <li><strong>Biomechanical Safety & AI Advice:</strong> 2D kinetic canvas form visualizers, joint protection swaps, and chronobiology recovery windows.</li>
+      <li><strong>Rapid Unstructured Logging:</strong> Client-side regex NLP parser converting natural lifting notes into structured volume logs in seconds.</li>
+      <li><strong>Social Accountability:</strong> Squad leaderboards, mutual cheers, kudos reactions, and 800×1000 story export cards.</li>
+      <li><strong>Total Data Portability & Zero Subscriptions:</strong> Operates offline via PWA, synchronizes wearable metrics, and exports CSV/.ICS files freely.</li>
     </ul>
 
+    <div class="page-footer">10</div>
+  </div>
+
+  <!-- ================= PAGE 11: SECTION 8 (TIMELINE & SIGNATURES) ================= -->
+  <div class="page">
     <h2 class="section-title">8. Work Plan / Timeline Table</h2>
-    <table style="margin: 4px 0; font-size: 9pt;">
+    <table style="margin: 6px 0; font-size: 9pt;">
       <thead>
         <tr>
           <th style="width: 7%; text-align: center;">Sr. No.</th>
@@ -614,29 +667,52 @@ Macro Split: High-Protein (40% Protein, 35% Carbs, 25% Fat) / Balanced / Low-Car
         </tr>
         <tr>
           <td style="text-align: center;">6</td>
-          <td>Fitness Articles & Motivational Quotes Module</td>
+          <td>Consistency Score, Heatmap & Badges (Phase 2)</td>
           <td style="text-align: center;">06/10/2026</td>
           <td style="text-align: center;">18/10/2026</td>
           <td style="text-align: center;">Completed</td>
         </tr>
         <tr>
           <td style="text-align: center;">7</td>
-          <td>System Integration & Cross-Browser Testing</td>
+          <td>Social Squads, AI NLP Parser & Wearables (Phases 3-5)</td>
           <td style="text-align: center;">19/10/2026</td>
-          <td style="text-align: center;">31/10/2026</td>
-          <td style="text-align: center;">In Progress</td>
+          <td style="text-align: center;">30/10/2026</td>
+          <td style="text-align: center;">Completed</td>
         </tr>
         <tr>
           <td style="text-align: center;">8</td>
           <td>Final Documentation & Project Synopsis Submission</td>
-          <td style="text-align: center;">01/11/2026</td>
+          <td style="text-align: center;">31/10/2026</td>
           <td style="text-align: center;">15/11/2026</td>
-          <td style="text-align: center;">In Progress</td>
+          <td style="text-align: center;">Completed</td>
         </tr>
       </tbody>
     </table>
 
-    <div class="page-footer">8</div>
+    <div style="margin-top: 45px;">
+      <h3 class="sub-title" style="border-bottom: 1px solid #aaa; padding-bottom: 3px;">Faculty Review & Approval</h3>
+      <table style="border: none; margin-top: 25px;">
+        <tr style="border: none;">
+          <td style="border: none; width: 33%; text-align: center; vertical-align: bottom; height: 75px;">
+            ___________________________<br>
+            <strong>Project Mentor</strong><br>
+            Department of CSA
+          </td>
+          <td style="border: none; width: 34%; text-align: center; vertical-align: bottom; height: 75px;">
+            ___________________________<br>
+            <strong>Project Coordinator</strong><br>
+            School of CSE
+          </td>
+          <td style="border: none; width: 33%; text-align: center; vertical-align: bottom; height: 75px;">
+            ___________________________<br>
+            <strong>Head of Department</strong><br>
+            Department of CSA
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="page-footer">11</div>
   </div>
 
 </body>

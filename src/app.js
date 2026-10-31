@@ -25,15 +25,20 @@ import { notificationService } from './services/notificationService.js';
 import { analyticsService } from './services/analyticsService.js';
 import { emailService } from './services/emailService.js';
 import { challengeService, ALL_BADGES } from './services/challengeService.js';
+import { socialService } from './services/socialService.js';
+import { shareCardService } from './services/shareCardService.js';
+import { aiService, MEDICAL_DISCLAIMER } from './services/aiService.js';
+import { exportService } from './services/exportService.js';
+import { integrationsService, WEARABLE_PROVIDERS, SPOTIFY_PLAYLISTS } from './services/integrationsService.js';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const THEMES = [
-  { id: 'cyber-neon',       name: 'Cyber Neon',      color: '#00f2fe', icon: 'fa-bolt' },
-  { id: 'sapphire-luxury',  name: 'Sapphire Luxury',  color: '#6366f1', icon: 'fa-gem' },
+  { id: 'cyber-neon', name: 'Cyber Neon', color: '#00f2fe', icon: 'fa-bolt' },
+  { id: 'sapphire-luxury', name: 'Sapphire Luxury', color: '#6366f1', icon: 'fa-gem' },
   { id: 'obsidian-crimson', name: 'Obsidian Crimson', color: '#ff334b', icon: 'fa-fire' },
-  { id: 'amber-gold',       name: 'Amber Gold',       color: '#f59e0b', icon: 'fa-sun' },
-  { id: 'arctic-light',     name: 'Arctic Light',     color: '#0284c7', icon: 'fa-snowflake' },
-  { id: 'solstice-glow',    name: 'Solstice Glow',    color: '#e07a5f', icon: 'fa-sun-plant-wilt' }
+  { id: 'amber-gold', name: 'Amber Gold', color: '#f59e0b', icon: 'fa-sun' },
+  { id: 'arctic-light', name: 'Arctic Light', color: '#0284c7', icon: 'fa-snowflake' },
+  { id: 'solstice-glow', name: 'Solstice Glow', color: '#e07a5f', icon: 'fa-sun-plant-wilt' }
 ];
 
 const DEFAULT_USER = {
@@ -48,27 +53,27 @@ const DEFAULT_USER = {
 class ForgeFuelApp {
   constructor() {
     // Auth state
-    this.accounts       = this.ls('ff_accounts', []);
-    this.currentUser    = this.ls('ff_current_user', null);
+    this.accounts = this.ls('ff_accounts', []);
+    this.currentUser = this.ls('ff_current_user', null);
 
     // App state
-    this.route          = this.currentUser ? 'home' : 'auth';
-    this.authMode       = 'login'; // 'login' | 'register'
-    this.authStep       = 1;
+    this.route = this.currentUser ? 'home' : 'auth';
+    this.authMode = 'login'; // 'login' | 'register'
+    this.authStep = 1;
 
     // Tracker & Nutrition
-    this.loggedMeals    = this.ls('ff_meals', []);
-    this.loggedSets     = this.ls('ff_sets', []);
-    this.waterIntake    = this.ls('ff_water', 0);
-    this.customFoodDb   = this.ls('ff_food_db', initialFoodDatabase);
-    this.foodSearch     = '';
+    this.loggedMeals = this.ls('ff_meals', []);
+    this.loggedSets = this.ls('ff_sets', []);
+    this.waterIntake = this.ls('ff_water', 0);
+    this.customFoodDb = this.ls('ff_food_db', initialFoodDatabase);
+    this.foodSearch = '';
     this.foodSearchResults = [];
     this.isFoodSearching = false;
     this.activeMealSlot = 'breakfast';
 
     // Workouts & Builder
-    this.workoutTab     = 'routines'; // 'routines' | 'catalog' | 'builder'
-    this.workoutSearch  = '';
+    this.workoutTab = 'routines'; // 'routines' | 'catalog' | 'builder'
+    this.workoutSearch = '';
     this.workoutCategory = 'all';
     this.builderWorkout = null;
 
@@ -77,8 +82,8 @@ class ForgeFuelApp {
     this.gymTimerInterval = null;
 
     // Calculators
-    this.calcUnit       = 'metric'; // 'metric' | 'imperial'
-    this.calcData       = {
+    this.calcUnit = 'metric'; // 'metric' | 'imperial'
+    this.calcData = {
       weight: 75,
       height: 175,
       weightLbs: 165,
@@ -94,15 +99,24 @@ class ForgeFuelApp {
     this.selectedPlannerDay = 'mon';
 
     // UI
-    this.activeTheme    = this.ls('ff_theme', 'cyber-neon');
-    this.isThemeOpen    = false;
-    this.isMobileOpen   = false;
+    this.activeTheme = this.ls('ff_theme', 'cyber-neon');
+    this.isThemeOpen = false;
+    this.isMoreOpen = false;
+    this.isMobileOpen = false;
+    this.communityTab = 'feed'; // 'feed' | 'buddies' | 'teams'
+    this.activeShareCardWorkout = null;
+    this.aiTab = 'coach'; // 'coach' | 'recovery' | 'nlp'
+    this.aiChatMessages = [
+      { sender: 'coach', text: "Welcome Athlete! I'm your FORGE AI Coach. Ask me about exercise form, regressions/swaps for joint discomfort, recovery tactics, or paste freeform workout text to parse and log automatically.", time: 'Just now' }
+    ];
+    this.nlpInputText = '';
+    this.nlpParsedResults = null;
     this.activeExerciseModal = null;
-    this.activeArticleModal  = null;
-    this.canvasFrame    = null;
-    this.canvasTick     = 0;
-    this.authError      = '';
-    this.onlineStatus   = typeof navigator !== 'undefined' ? navigator.onLine : true;
+    this.activeArticleModal = null;
+    this.canvasFrame = null;
+    this.canvasTick = 0;
+    this.authError = '';
+    this.onlineStatus = typeof navigator !== 'undefined' ? navigator.onLine : true;
     this.pwaInstallPrompt = null;
 
     this.init();
@@ -114,7 +128,7 @@ class ForgeFuelApp {
     catch { return fallback; }
   }
   ss(key, val) {
-    try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch { }
   }
 
   // ── Boot ──────────────────────────────────────────────────────────────────────
@@ -135,7 +149,7 @@ class ForgeFuelApp {
 
     // PWA & Service Worker
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
+      navigator.serviceWorker.register('/sw.js').catch(() => { });
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         this.pwaInstallPrompt = e;
@@ -149,6 +163,22 @@ class ForgeFuelApp {
         this.onlineStatus = false;
         this.showToast('Offline mode active. Logging locally.');
         this.render();
+      });
+    }
+
+    // Close popovers on click outside
+    if (typeof window !== 'undefined') {
+      window.addEventListener('click', (e) => {
+        let changed = false;
+        if (this.isThemeOpen && !e.target.closest('.theme-dropdown-wrapper')) {
+          this.isThemeOpen = false;
+          changed = true;
+        }
+        if (this.isMoreOpen && !e.target.closest('.more-dropdown-wrapper')) {
+          this.isMoreOpen = false;
+          changed = true;
+        }
+        if (changed) this.render();
       });
     }
 
@@ -169,6 +199,8 @@ class ForgeFuelApp {
     }
     this.route = route;
     this.isMobileOpen = false;
+    this.isThemeOpen = false;
+    this.isMoreOpen = false;
     window.scrollTo({ top: 0, behavior: 'smooth' });
     this.render();
   }
@@ -216,16 +248,16 @@ class ForgeFuelApp {
     const newUser = {
       ...DEFAULT_USER,
       ...this._pendingReg,
-      age:          parseInt(fd.get('age'))    || 25,
-      height:       parseInt(fd.get('height')) || 175,
-      weight:       parseFloat(fd.get('weight')) || 75,
+      age: parseInt(fd.get('age')) || 25,
+      height: parseInt(fd.get('height')) || 175,
+      weight: parseFloat(fd.get('weight')) || 75,
       targetWeight: parseFloat(fd.get('targetWeight')) || 70,
-      gender:       fd.get('gender') || 'male',
-      activityLevel:parseFloat(fd.get('activity')) || 1.55,
-      goal:         fd.get('goal') || 'cut',
-      streakDays:   0,
-      savedWorkouts:[],
-      bookmarkedQuotes:[]
+      gender: fd.get('gender') || 'male',
+      activityLevel: parseFloat(fd.get('activity')) || 1.55,
+      goal: fd.get('goal') || 'cut',
+      streakDays: 0,
+      savedWorkouts: [],
+      bookmarkedQuotes: []
     };
     this.accounts.push(newUser);
     this.ss('ff_accounts', this.accounts);
@@ -276,7 +308,7 @@ class ForgeFuelApp {
   // ── Metrics ───────────────────────────────────────────────────────────────────
   getMetrics() {
     if (!this.currentUser) return null;
-    const bmr  = calculateBMR(this.currentUser);
+    const bmr = calculateBMR(this.currentUser);
     const tdee = calculateTDEE(bmr, this.currentUser.activityLevel);
     const macros = calculateMacroTargets(tdee, this.currentUser.goal, this.currentUser.ratioType || 'balanced');
     const waterGoal = calculateWaterGoal(this.currentUser.weight);
@@ -336,50 +368,85 @@ class ForgeFuelApp {
     const t = THEMES.find(x => x.id === this.activeTheme) || THEMES[0];
     const u = this.currentUser;
     const initials = u ? u.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?';
-    const navLinks = [
-      { r: 'home',        icon: 'fa-house',         label: 'Dashboard' },
-      { r: 'workouts',    icon: 'fa-dumbbell',      label: 'Workouts' },
-      { r: 'tracker',     icon: 'fa-chart-pie',     label: 'Nutrition' },
-      { r: 'calculators', icon: 'fa-calculator',    label: 'Calculators' },
-      { r: 'planner',     icon: 'fa-calendar-week', label: 'Planner' },
-      { r: 'progress',    icon: 'fa-chart-line',    label: 'Insights' },
-      { r: 'challenges',  icon: 'fa-trophy',        label: 'Challenges' },
+    const displayName = u ? (u.name.length > 18 ? u.name.split(' ')[0] : u.name) : 'Athlete';
+
+    const primaryLinks = [
+      { r: 'home', icon: 'fa-house', label: 'Dashboard' },
+      { r: 'workouts', icon: 'fa-dumbbell', label: 'Workouts' },
+      { r: 'tracker', icon: 'fa-chart-pie', label: 'Nutrition' },
+      { r: 'calculators', icon: 'fa-calculator', label: 'Calculators' },
+      { r: 'progress', icon: 'fa-chart-line', label: 'Insights' },
+      { r: 'community', icon: 'fa-users', label: 'Community' },
+      { r: 'ai-coach', icon: 'fa-brain', label: 'AI Coach' },
     ];
-    // Additional links for mobile drawer
-    const mobileExtraLinks = [
-      { r: 'knowledge',   icon: 'fa-book-open',     label: 'Knowledge' },
-      { r: 'motivation',  icon: 'fa-bolt',          label: 'Mindset' },
+
+    const secondaryLinks = [
+      { r: 'challenges', icon: 'fa-trophy', label: 'Challenges' },
+      { r: 'planner', icon: 'fa-calendar-week', label: 'Planner' },
+      { r: 'knowledge', icon: 'fa-book-open', label: 'Knowledge' },
+      { r: 'motivation', icon: 'fa-bolt', label: 'Mindset' },
     ];
-    const allLinks = this.isMobileOpen ? [...navLinks, ...mobileExtraLinks] : navLinks;
+
+    const isSecondaryActive = secondaryLinks.some(l => l.r === this.route);
+    const activeSecondary = secondaryLinks.find(l => l.r === this.route);
 
     return `
       <header class="header-wrapper">
         <nav class="navbar">
-          <div class="navbar-brand" onclick="window.app.go('home')">
+          <div class="navbar-brand" onclick="window.app.go('home')" title="FORGE & FUEL MATRIX">
             <div class="brand-icon"><i class="fa-solid ${t.icon}"></i></div>
             <div class="brand-title">FORGE<span>&FUEL</span></div>
           </div>
 
           <div class="navbar-links ${this.isMobileOpen ? 'mobile-open' : ''}">
-            ${allLinks.map(l => `
-              <button class="nav-link ${this.route === l.r ? 'active' : ''}" onclick="window.app.go('${l.r}')">
-                <i class="fa-solid ${l.icon}"></i> <span>${l.label}</span>
-              </button>
-            `).join('')}
+            ${this.isMobileOpen ? `
+              ${[...primaryLinks, ...secondaryLinks].map(l => `
+                <button class="nav-link ${this.route === l.r ? 'active' : ''}" onclick="window.app.go('${l.r}')">
+                  <i class="fa-solid ${l.icon}"></i> <span>${l.label}</span>
+                </button>
+              `).join('')}
+            ` : `
+              ${primaryLinks.map(l => `
+                <button class="nav-link ${this.route === l.r ? 'active' : ''}" onclick="window.app.go('${l.r}')">
+                  <i class="fa-solid ${l.icon}"></i> <span>${l.label}</span>
+                </button>
+              `).join('')}
+              <div class="more-dropdown-wrapper">
+                <button class="nav-link more-toggle-btn ${isSecondaryActive ? 'active' : ''}" onclick="window.app.toggleMore()" title="More Sections">
+                  <i class="fa-solid fa-layer-group"></i>
+                  <span>${isSecondaryActive && activeSecondary ? activeSecondary.label : 'More'}</span>
+                  <i class="fa-solid fa-chevron-down text-xs ${this.isMoreOpen ? 'rotate-180' : ''}"></i>
+                </button>
+                <div id="more-popover" class="more-popover ${this.isMoreOpen ? 'show' : ''}">
+                  <div class="popover-heading">EXPLORE MORE</div>
+                  ${secondaryLinks.map(l => `
+                    <button class="more-popover-item ${this.route === l.r ? 'active' : ''}" onclick="window.app.go('${l.r}')">
+                      <span class="more-item-left">
+                        <i class="fa-solid ${l.icon}"></i>
+                        <span>${l.label}</span>
+                      </span>
+                      ${this.route === l.r ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+            `}
           </div>
 
           <div class="navbar-actions">
             <div class="theme-dropdown-wrapper">
-              <button class="theme-toggle-btn" onclick="window.app.toggleTheme()" title="Theme: ${t.name}">
+              <button class="theme-toggle-btn" onclick="window.app.toggleTheme()" title="Active Theme: ${t.name}">
                 <span class="theme-dot" style="background:${t.color};box-shadow:0 0 8px ${t.color}"></span>
                 <span class="theme-name-text">${t.name}</span>
-                <i class="fa-solid fa-chevron-down text-xs"></i>
+                <i class="fa-solid fa-chevron-down text-xs ${this.isThemeOpen ? 'rotate-180' : ''}"></i>
               </button>
               <div id="theme-popover" class="theme-popover ${this.isThemeOpen ? 'show' : ''}">
+                <div class="popover-heading">SELECT THEME</div>
                 ${THEMES.map(th => `
                   <button class="theme-popover-item ${this.activeTheme === th.id ? 'active' : ''}" onclick="window.app.setTheme('${th.id}')">
                     <span style="display:flex;align-items:center;gap:8px">
-                      <span class="theme-dot" style="background:${th.color}"></span>${th.name}
+                      <span class="theme-dot" style="background:${th.color}"></span>
+                      <span class="theme-item-name">${th.name}</span>
                     </span>
                     ${this.activeTheme === th.id ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
                   </button>
@@ -387,12 +454,12 @@ class ForgeFuelApp {
               </div>
             </div>
 
-            <button class="user-avatar-btn" onclick="window.app.go('profile')" title="My Profile: ${u ? u.name : ''}">
+            <button class="user-avatar-btn" onclick="window.app.go('profile')" title="My Profile: ${u ? u.name : 'Athlete'}">
               <div class="user-avatar">${initials}</div>
-              <span class="user-name-nav">${u ? u.name.split(' ')[0] : ''}</span>
+              <span class="user-name-nav">${displayName}</span>
             </button>
 
-            <button class="btn-hamburger" onclick="window.app.toggleMobile()" aria-label="Menu">
+            <button class="btn-hamburger" onclick="window.app.toggleMobile()" aria-label="Toggle navigation menu">
               <i class="fa-solid ${this.isMobileOpen ? 'fa-xmark' : 'fa-bars'}"></i>
             </button>
           </div>
@@ -401,19 +468,40 @@ class ForgeFuelApp {
     `;
   }
 
-  toggleTheme() { this.isThemeOpen = !this.isThemeOpen; this.render(); }
-  setTheme(id) { this.applyTheme(id); this.isThemeOpen = false; this.showToast(`Theme: ${THEMES.find(t=>t.id===id)?.name}`); this.render(); }
-  toggleMobile() { this.isMobileOpen = !this.isMobileOpen; this.render(); }
+  toggleTheme() {
+    this.isThemeOpen = !this.isThemeOpen;
+    if (this.isThemeOpen) this.isMoreOpen = false;
+    this.render();
+  }
+  toggleMore() {
+    this.isMoreOpen = !this.isMoreOpen;
+    if (this.isMoreOpen) this.isThemeOpen = false;
+    this.render();
+  }
+  setTheme(id) {
+    this.applyTheme(id);
+    this.isThemeOpen = false;
+    this.showToast(`Theme: ${THEMES.find(t => t.id === id)?.name}`);
+    this.render();
+  }
+  toggleMobile() {
+    this.isMobileOpen = !this.isMobileOpen;
+    if (this.isMobileOpen) {
+      this.isThemeOpen = false;
+      this.isMoreOpen = false;
+    }
+    this.render();
+  }
 
   // ─────────────────────────── MOBILE BAR ────────────────────────────────────
   renderMobileBar() {
     const links = [
-      { r: 'home',        icon: 'fa-house',         label: 'Home' },
-      { r: 'workouts',    icon: 'fa-dumbbell',      label: 'Train' },
-      { r: 'tracker',     icon: 'fa-utensils',      label: 'Macros' },
-      { r: 'progress',    icon: 'fa-chart-line',    label: 'Insights' },
-      { r: 'challenges',  icon: 'fa-trophy',        label: 'Badges' },
-      { r: 'profile',     icon: 'fa-user',          label: 'Profile' },
+      { r: 'home', icon: 'fa-house', label: 'Home' },
+      { r: 'workouts', icon: 'fa-dumbbell', label: 'Train' },
+      { r: 'tracker', icon: 'fa-utensils', label: 'Macros' },
+      { r: 'ai-coach', icon: 'fa-brain', label: 'AI Coach' },
+      { r: 'community', icon: 'fa-users', label: 'Squad' },
+      { r: 'challenges', icon: 'fa-trophy', label: 'Badges' },
     ];
     return `
       <div class="mobile-bar">
@@ -430,29 +518,31 @@ class ForgeFuelApp {
   // ─────────────────────────── ROUTER ────────────────────────────────────────
   renderView() {
     switch (this.route) {
-      case 'home':        return this.renderHome();
-      case 'workouts':    return this.renderWorkouts();
+      case 'home': return this.renderHome();
+      case 'workouts': return this.renderWorkouts();
       case 'calculators': return this.renderCalculators();
-      case 'tracker':     return this.renderTracker();
-      case 'planner':     return this.renderPlanner();
-      case 'progress':    return this.renderProgress();
-      case 'challenges':  return this.renderChallenges();
-      case 'knowledge':   return this.renderKnowledge();
-      case 'motivation':  return this.renderMotivation();
-      case 'profile':     return this.renderProfile();
-      default:            return this.renderHome();
+      case 'tracker': return this.renderTracker();
+      case 'planner': return this.renderPlanner();
+      case 'progress': return this.renderProgress();
+      case 'challenges': return this.renderChallenges();
+      case 'community': return this.renderCommunity();
+      case 'ai-coach': return this.renderAiCoach();
+      case 'knowledge': return this.renderKnowledge();
+      case 'motivation': return this.renderMotivation();
+      case 'profile': return this.renderProfile();
+      default: return this.renderHome();
     }
   }
 
   // ─────────────────────────── HOME / DASHBOARD ──────────────────────────────
   renderHome() {
-    const u  = this.currentUser;
-    const m  = this.getMetrics();
+    const u = this.currentUser;
+    const m = this.getMetrics();
     const td = this.getTodayMacros();
     const summary = analyticsService.getWeeklySummary(u, workoutService.getLogs(), this.loggedMeals, this.loggedSets, this.waterIntake);
     const caloriesPct = m ? Math.min(100, (td.cals / m.macros.calories) * 100) : 0;
-    const proteinPct  = m ? Math.min(100, (td.p   / m.macros.protein)   * 100) : 0;
-    const waterPct    = m ? Math.min(100, (this.waterIntake / m.waterGoal) * 100) : 0;
+    const proteinPct = m ? Math.min(100, (td.p / m.macros.protein) * 100) : 0;
+    const waterPct = m ? Math.min(100, (this.waterIntake / m.waterGoal) * 100) : 0;
 
     const hour = new Date().getHours();
     const greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
@@ -581,7 +671,7 @@ class ForgeFuelApp {
   renderWorkouts() {
     const customRoutines = workoutService.getAllWorkouts();
     const filteredExercises = exercisesData.filter(ex => {
-      const matchCat  = this.workoutCategory === 'all' || ex.category === this.workoutCategory;
+      const matchCat = this.workoutCategory === 'all' || ex.category === this.workoutCategory;
       const matchSearch = !this.workoutSearch || ex.name.toLowerCase().includes(this.workoutSearch.toLowerCase());
       return matchCat && matchSearch;
     });
@@ -612,8 +702,8 @@ class ForgeFuelApp {
           <!-- Routines List -->
           <div class="grid-3">
             ${customRoutines.map(routine => {
-              const totalExercises = routine.circuits.reduce((acc, c) => acc + c.exercises.length, 0);
-              return `
+      const totalExercises = routine.circuits.reduce((acc, c) => acc + c.exercises.length, 0);
+      return `
                 <div class="routine-card">
                   <div>
                     <div class="routine-header">
@@ -631,7 +721,7 @@ class ForgeFuelApp {
                     <!-- Circuits Summary -->
                     ${routine.circuits.map((c, i) => `
                       <div class="circuit-box" style="padding:10px;margin-bottom:8px">
-                        <div style="font-size:0.75rem;font-weight:700;color:var(--color-primary)">CIRCUIT ${i+1}: ${c.name}</div>
+                        <div style="font-size:0.75rem;font-weight:700;color:var(--color-primary)">CIRCUIT ${i + 1}: ${c.name}</div>
                         <div style="font-size:0.75rem;color:var(--color-muted)">${c.exercises.length} Exercises (Rest: ${c.restBetweenSets}s)</div>
                       </div>
                     `).join('')}
@@ -650,7 +740,7 @@ class ForgeFuelApp {
                   </div>
                 </div>
               `;
-            }).join('')}
+    }).join('')}
           </div>
         ` : `
           <!-- Exercise Catalog -->
@@ -704,14 +794,14 @@ class ForgeFuelApp {
   }
   logSet(exId) {
     const weight = parseFloat(document.getElementById('set-weight')?.value) || 0;
-    const reps   = parseInt(document.getElementById('set-reps')?.value)   || 0;
+    const reps = parseInt(document.getElementById('set-reps')?.value) || 0;
     if (reps <= 0) { this.showToast('Please enter valid reps!'); return; }
-    
+
     // Check PR
     const pr = workoutService.checkAndRecordPR(exId, weight, reps);
     this.loggedSets.push({ id: Date.now(), exerciseId: exId, weight, reps, date: new Date().toDateString() });
     this.ss('ff_sets', this.loggedSets);
-    
+
     if (pr) {
       audioCueService.playVictory();
       this.triggerConfetti();
@@ -831,18 +921,18 @@ class ForgeFuelApp {
               <div class="input-group">
                 <label class="input-label">Category</label>
                 <select class="input-field" onchange="window.app.builderWorkout.category=this.value">
-                  <option value="strength" ${b.category==='strength'?'selected':''}>Strength</option>
-                  <option value="hypertrophy" ${b.category==='hypertrophy'?'selected':''}>Hypertrophy</option>
-                  <option value="cardio" ${b.category==='cardio'?'selected':''}>Cardio & HIIT</option>
-                  <option value="mobility" ${b.category==='mobility'?'selected':''}>Mobility</option>
+                  <option value="strength" ${b.category === 'strength' ? 'selected' : ''}>Strength</option>
+                  <option value="hypertrophy" ${b.category === 'hypertrophy' ? 'selected' : ''}>Hypertrophy</option>
+                  <option value="cardio" ${b.category === 'cardio' ? 'selected' : ''}>Cardio & HIIT</option>
+                  <option value="mobility" ${b.category === 'mobility' ? 'selected' : ''}>Mobility</option>
                 </select>
               </div>
               <div class="input-group">
                 <label class="input-label">Difficulty</label>
                 <select class="input-field" onchange="window.app.builderWorkout.difficulty=this.value">
-                  <option value="Beginner" ${b.difficulty==='Beginner'?'selected':''}>Beginner</option>
-                  <option value="Intermediate" ${b.difficulty==='Intermediate'?'selected':''}>Intermediate</option>
-                  <option value="Advanced" ${b.difficulty==='Advanced'?'selected':''}>Advanced</option>
+                  <option value="Beginner" ${b.difficulty === 'Beginner' ? 'selected' : ''}>Beginner</option>
+                  <option value="Intermediate" ${b.difficulty === 'Intermediate' ? 'selected' : ''}>Intermediate</option>
+                  <option value="Advanced" ${b.difficulty === 'Advanced' ? 'selected' : ''}>Advanced</option>
                 </select>
               </div>
             </div>
@@ -863,7 +953,7 @@ class ForgeFuelApp {
                       <label style="font-size:0.75rem;color:var(--color-muted)">Rest (s):</label>
                       <select style="background:var(--bg-card);border:1px solid var(--color-border);color:#fff;border-radius:4px;padding:2px 6px;font-size:0.75rem"
                         onchange="window.app.builderWorkout.circuits[${cIdx}].restBetweenSets=parseInt(this.value)">
-                        ${[30,45,60,90,120,180].map(s => `<option value="${s}" ${circuit.restBetweenSets===s?'selected':''}>${s}s</option>`).join('')}
+                        ${[30, 45, 60, 90, 120, 180].map(s => `<option value="${s}" ${circuit.restBetweenSets === s ? 'selected' : ''}>${s}s</option>`).join('')}
                       </select>
                       <button class="btn btn-outline btn-sm" style="padding:4px 8px" onclick="window.app.removeCircuitFromBuilder(${cIdx})"><i class="fa-solid fa-trash"></i></button>
                     </div>
@@ -874,7 +964,7 @@ class ForgeFuelApp {
                     <div class="circuit-item-row">
                       <select class="input-field" style="padding:6px 10px;font-size:0.8rem"
                         onchange="window.app.builderWorkout.circuits[${cIdx}].exercises[${eIdx}].exerciseId=this.value">
-                        ${exercisesData.map(ed => `<option value="${ed.id}" ${ed.id===ex.exerciseId?'selected':''}>${ed.name}</option>`).join('')}
+                        ${exercisesData.map(ed => `<option value="${ed.id}" ${ed.id === ex.exerciseId ? 'selected' : ''}>${ed.name}</option>`).join('')}
                       </select>
                       <input type="number" class="input-field" placeholder="Sets" value="${ex.sets}" title="Sets"
                         onchange="window.app.builderWorkout.circuits[${cIdx}].exercises[${eIdx}].sets=parseInt(this.value)||1" />
@@ -1191,27 +1281,37 @@ class ForgeFuelApp {
               ${isMetric ? `
                 <div class="input-group">
                   <label class="input-label">Weight (kg)</label>
-                  <input type="number" class="input-field" value="${cd.weight}"
-                    oninput="window.app.calcData.weight=parseFloat(this.value)||70;window.app.render()" />
+                  <input type="number" class="input-field calc-input" id="calc-weight-kg"
+                    value="${cd.weight}" min="20" max="300" step="0.5"
+                    oninput="window.app.updateCalc('weight', this.value, v => parseFloat(v)||70)"
+                    onchange="window.app.render()" />
                 </div>
                 <div class="input-group">
                   <label class="input-label">Height (cm)</label>
-                  <input type="number" class="input-field" value="${cd.height}"
-                    oninput="window.app.calcData.height=parseFloat(this.value)||175;window.app.render()" />
+                  <input type="number" class="input-field calc-input" id="calc-height-cm"
+                    value="${cd.height}" min="100" max="250" step="1"
+                    oninput="window.app.updateCalc('height', this.value, v => parseFloat(v)||175)"
+                    onchange="window.app.render()" />
                 </div>
               ` : `
                 <div class="input-group">
                   <label class="input-label">Weight (lbs)</label>
-                  <input type="number" class="input-field" value="${cd.weightLbs}"
-                    oninput="window.app.calcData.weightLbs=parseFloat(this.value)||160;window.app.render()" />
+                  <input type="number" class="input-field calc-input" id="calc-weight-lbs"
+                    value="${cd.weightLbs}" min="44" max="660" step="1"
+                    oninput="window.app.updateCalc('weightLbs', this.value, v => parseFloat(v)||160)"
+                    onchange="window.app.render()" />
                 </div>
                 <div class="input-group">
                   <label class="input-label">Height (ft & in)</label>
                   <div class="flex gap-2">
-                    <input type="number" class="input-field" placeholder="Ft" value="${cd.heightFeet}"
-                      oninput="window.app.calcData.heightFeet=parseInt(this.value)||5;window.app.render()" />
-                    <input type="number" class="input-field" placeholder="In" value="${cd.heightInches}"
-                      oninput="window.app.calcData.heightInches=parseInt(this.value)||0;window.app.render()" />
+                    <input type="number" class="input-field calc-input" id="calc-height-ft"
+                      placeholder="Ft" value="${cd.heightFeet}" min="3" max="8" step="1"
+                      oninput="window.app.updateCalc('heightFeet', this.value, v => parseInt(v)||5)"
+                      onchange="window.app.render()" />
+                    <input type="number" class="input-field calc-input" id="calc-height-in"
+                      placeholder="In" value="${cd.heightInches}" min="0" max="11" step="1"
+                      oninput="window.app.updateCalc('heightInches', this.value, v => parseInt(v)||0)"
+                      onchange="window.app.render()" />
                   </div>
                 </div>
               `}
@@ -1234,15 +1334,17 @@ class ForgeFuelApp {
             
             <div class="reg-grid-2">
               <div class="input-group">
-                <label class="input-label">Age</label>
-                <input type="number" class="input-field" value="${cd.age}"
-                  oninput="window.app.calcData.age=parseInt(this.value)||25;window.app.render()" />
+                <label class="input-label">Age (years)</label>
+                <input type="number" class="input-field calc-input" id="calc-age"
+                  value="${cd.age}" min="10" max="100" step="1"
+                  oninput="window.app.updateCalc('age', this.value, v => parseInt(v)||25)"
+                  onchange="window.app.render()" />
               </div>
               <div class="input-group">
                 <label class="input-label">Gender</label>
                 <select class="input-field" onchange="window.app.calcData.gender=this.value;window.app.render()">
-                  <option value="male" ${cd.gender==='male'?'selected':''}>Male</option>
-                  <option value="female" ${cd.gender==='female'?'selected':''}>Female</option>
+                  <option value="male" ${cd.gender === 'male' ? 'selected' : ''}>Male</option>
+                  <option value="female" ${cd.gender === 'female' ? 'selected' : ''}>Female</option>
                 </select>
               </div>
             </div>
@@ -1265,21 +1367,21 @@ class ForgeFuelApp {
             <div class="input-group">
               <label class="input-label">Activity Multiplier</label>
               <select class="input-field" onchange="window.app.calcData.activity=parseFloat(this.value);window.app.render()">
-                <option value="1.2" ${cd.activity===1.2?'selected':''}>Sedentary (Desk job, little exercise)</option>
-                <option value="1.375" ${cd.activity===1.375?'selected':''}>Light (1-3 workout days/wk)</option>
-                <option value="1.55" ${cd.activity===1.55?'selected':''}>Moderate (3-5 workout days/wk)</option>
-                <option value="1.725" ${cd.activity===1.725?'selected':''}>Heavy (6-7 intense days/wk)</option>
-                <option value="1.9" ${cd.activity===1.9?'selected':''}>Athlete (2x training/day)</option>
+                <option value="1.2" ${cd.activity === 1.2 ? 'selected' : ''}>Sedentary (Desk job, little exercise)</option>
+                <option value="1.375" ${cd.activity === 1.375 ? 'selected' : ''}>Light (1-3 workout days/wk)</option>
+                <option value="1.55" ${cd.activity === 1.55 ? 'selected' : ''}>Moderate (3-5 workout days/wk)</option>
+                <option value="1.725" ${cd.activity === 1.725 ? 'selected' : ''}>Heavy (6-7 intense days/wk)</option>
+                <option value="1.9" ${cd.activity === 1.9 ? 'selected' : ''}>Athlete (2x training/day)</option>
               </select>
             </div>
 
             <div class="input-group">
               <label class="input-label">Target Fitness Goal</label>
               <select class="input-field" onchange="window.app.calcData.goal=this.value;window.app.render()">
-                <option value="cut" ${cd.goal==='cut'?'selected':''}>Fat Loss Cut (-20% deficit)</option>
-                <option value="maintenance" ${cd.goal==='maintenance'?'selected':''}>Maintenance (Equilibrium)</option>
-                <option value="bulk" ${cd.goal==='bulk'?'selected':''}>Lean Bulk (+15% surplus)</option>
-                <option value="recomp" ${cd.goal==='recomp'?'selected':''}>Body Recomposition (-5%)</option>
+                <option value="cut" ${cd.goal === 'cut' ? 'selected' : ''}>Fat Loss Cut (-20% deficit)</option>
+                <option value="maintenance" ${cd.goal === 'maintenance' ? 'selected' : ''}>Maintenance (Equilibrium)</option>
+                <option value="bulk" ${cd.goal === 'bulk' ? 'selected' : ''}>Lean Bulk (+15% surplus)</option>
+                <option value="recomp" ${cd.goal === 'recomp' ? 'selected' : ''}>Body Recomposition (-5%)</option>
               </select>
             </div>
 
@@ -1303,9 +1405,21 @@ class ForgeFuelApp {
     this.render();
   }
 
+  /**
+   * Called on every calc input keystroke.
+   * Updates state immediately (so data is always current) then
+   * debounces the full re-render so the input never loses focus mid-type.
+   */
+  updateCalc(field, value, parser) {
+    this.calcData[field] = parser(value);
+    // Debounce the visual update — only re-render 600ms after user stops typing
+    clearTimeout(this._calcDebounce);
+    this._calcDebounce = setTimeout(() => { this.render(); }, 600);
+  }
+
   // ─────────────────────────── NUTRITION & TRACKER VIEW ───────────────────────
   renderTracker() {
-    const m  = this.getMetrics();
+    const m = this.getMetrics();
     const td = this.getTodayMacros();
     if (!m) return '<div class="view-container"><p>Loading...</p></div>';
 
@@ -1336,26 +1450,26 @@ class ForgeFuelApp {
               <i class="fa-solid fa-fire-flame-curved tmac-icon"></i>
             </div>
             <div class="tmac-vals">${td.cals} <span>/ ${m.macros.calories}</span></div>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct(td.cals,m.macros.calories)};background:var(--color-primary)"></div></div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct(td.cals, m.macros.calories)};background:var(--color-primary)"></div></div>
             <span class="tmac-remain">${Math.max(0, m.macros.calories - td.cals)} kcal remaining</span>
           </div>
 
           <div class="tracker-macro-card">
             <div class="tmac-top"><span class="tmac-label">Protein</span><i class="fa-solid fa-egg tmac-icon" style="color:#10b981"></i></div>
             <div class="tmac-vals">${td.p}g <span>/ ${m.macros.protein}g</span></div>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct(td.p,m.macros.protein)};background:#10b981"></div></div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct(td.p, m.macros.protein)};background:#10b981"></div></div>
           </div>
 
           <div class="tracker-macro-card">
             <div class="tmac-top"><span class="tmac-label">Carbs</span><i class="fa-solid fa-wheat-awn tmac-icon" style="color:#f59e0b"></i></div>
             <div class="tmac-vals">${td.c}g <span>/ ${m.macros.carbs}g</span></div>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct(td.c,m.macros.carbs)};background:#f59e0b"></div></div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct(td.c, m.macros.carbs)};background:#f59e0b"></div></div>
           </div>
 
           <div class="tracker-macro-card">
             <div class="tmac-top"><span class="tmac-label">Fats</span><i class="fa-solid fa-droplet tmac-icon" style="color:#e879f9"></i></div>
             <div class="tmac-vals">${td.f}g <span>/ ${m.macros.fat}g</span></div>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct(td.f,m.macros.fat)};background:#e879f9"></div></div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct(td.f, m.macros.fat)};background:#e879f9"></div></div>
           </div>
         </div>
 
@@ -1571,8 +1685,8 @@ class ForgeFuelApp {
 
             <!-- Meal Slots (Breakfast, Lunch, Dinner, Snacks) -->
             ${MEAL_TYPES.map(mt => {
-              const items = dayData[mt.id] || [];
-              return `
+      const items = dayData[mt.id] || [];
+      return `
                 <div class="circuit-box" style="margin-top:10px">
                   <div class="flex justify-between items-center" style="margin-bottom:8px">
                     <span style="font-weight:700;color:var(--color-primary);font-size:0.85rem">
@@ -1596,7 +1710,7 @@ class ForgeFuelApp {
                   `).join('')}
                 </div>
               `;
-            }).join('')}
+    }).join('')}
           </div>
 
           <!-- Auto-Generated Grocery List -->
@@ -1824,8 +1938,8 @@ class ForgeFuelApp {
             ` : `
               <div style="display:flex;flex-direction:column;gap:10px;max-height:300px;overflow-y:auto">
                 ${prList.map(pr => {
-                  const ex = exercisesData.find(e => e.id === pr.exerciseId);
-                  return `
+      const ex = exercisesData.find(e => e.id === pr.exerciseId);
+      return `
                     <div class="flex justify-between items-center" style="padding:12px;background:rgba(255,255,255,0.03);border:1px solid var(--color-border);border-radius:var(--radius-md)">
                       <div>
                         <strong style="color:var(--color-white);font-size:0.95rem">${ex?.name || pr.exerciseId}</strong>
@@ -1834,7 +1948,7 @@ class ForgeFuelApp {
                       <span class="badge badge-primary">${pr.weight}kg × ${pr.reps} reps</span>
                     </div>
                   `;
-                }).join('')}
+    }).join('')}
               </div>
             `}
           </div>
@@ -1923,8 +2037,8 @@ class ForgeFuelApp {
 
         <div class="grid-2" style="margin-bottom:32px">
           ${challenges.map(c => {
-            const pct = Math.min(100, Math.round((c.progress / c.target) * 100));
-            return `
+      const pct = Math.min(100, Math.round((c.progress / c.target) * 100));
+      return `
               <div class="challenge-card">
                 <div>
                   <div class="challenge-header">
@@ -1962,7 +2076,7 @@ class ForgeFuelApp {
                 </div>
               </div>
             `;
-          }).join('')}
+    }).join('')}
         </div>
 
         <!-- Badges & Achievements Showcase -->
@@ -1972,7 +2086,7 @@ class ForgeFuelApp {
               <h2 class="calc-card-title"><i class="fa-solid fa-award" style="color:var(--color-secondary)"></i> Unlockable Badges</h2>
               <p class="text-muted text-xs">Earn badges by hitting consistency milestones, conquering challenges, and setting new PRs.</p>
             </div>
-            <span class="badge badge-outline">${badges.filter(b=>b.unlocked).length} / ${badges.length} Unlocked</span>
+            <span class="badge badge-outline">${badges.filter(b => b.unlocked).length} / ${badges.length} Unlocked</span>
           </div>
 
           <div class="badge-grid">
@@ -2025,13 +2139,747 @@ class ForgeFuelApp {
         title: `Join me on FORGE & FUEL: ${c.title}`,
         text: `Take on the ${c.title} challenge with me!`,
         url: link
-      }).catch(() => {});
+      }).catch(() => { });
     } else if (navigator.clipboard) {
       navigator.clipboard.writeText(link);
       this.showToast('Invite link copied to clipboard! Share with your gym buddies 🚀');
     } else {
       prompt('Share this invite link with your friends:', link);
     }
+  }
+
+  // ─────────────────────────── COMMUNITY & SQUADS ─────────────────────────────
+  renderCommunity() {
+    const feed = socialService.getFeed();
+    const buddies = socialService.getBuddies();
+    const teams = socialService.getTeams();
+    const leaderboard = socialService.getLeaderboard();
+
+    return `
+      <div class="view-container animate-fade-in">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow"><span class="eyebrow-dot"></span> Athlete Network & Squads</p>
+            <h1 class="page-title">Community & Teams</h1>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" onclick="window.app.openShareCardModal()">
+              <i class="fa-solid fa-camera"></i> Share Card
+            </button>
+          </div>
+        </div>
+
+        <!-- Sub Tabs -->
+        <div class="workout-tabs" style="margin-bottom:24px">
+          <button class="workout-tab-btn ${this.communityTab === 'feed' ? 'active' : ''}" onclick="window.app.setCommunityTab('feed')">
+            <i class="fa-solid fa-rss"></i> Activity Feed
+          </button>
+          <button class="workout-tab-btn ${this.communityTab === 'buddies' ? 'active' : ''}" onclick="window.app.setCommunityTab('buddies')">
+            <i class="fa-solid fa-user-group"></i> Buddies & Cheers (${buddies.length})
+          </button>
+          <button class="workout-tab-btn ${this.communityTab === 'teams' ? 'active' : ''}" onclick="window.app.setCommunityTab('teams')">
+            <i class="fa-solid fa-shield-halved"></i> Teams & Leaderboard (${teams.length})
+          </button>
+        </div>
+
+        ${this.communityTab === 'feed' ? this.renderCommunityFeed(feed) : ''}
+        ${this.communityTab === 'buddies' ? this.renderCommunityBuddies(buddies) : ''}
+        ${this.communityTab === 'teams' ? this.renderCommunityTeams(teams, leaderboard) : ''}
+      </div>
+    `;
+  }
+
+  renderCommunityFeed(feed) {
+    return `
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="calc-card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div>
+            <strong style="color:var(--color-white);font-size:0.95rem">Broadcast Your Workout to Matrix</strong>
+            <p class="text-muted text-xs" style="margin-top:2px">Generate an 800×1000 story card with your total volume, PRs, and consistency score.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="window.app.openShareCardModal()">
+            <i class="fa-solid fa-share-nodes"></i> Create Share Card
+          </button>
+        </div>
+
+        ${feed.map(post => `
+          <div class="calc-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+              <div style="display:flex;align-items:center;gap:12px">
+                <div class="profile-avatar" style="width:40px;height:40px;font-size:1rem;margin:0">
+                  ${post.authorAvatar || 'AT'}
+                </div>
+                <div>
+                  <strong style="color:var(--color-white);font-size:0.95rem">${post.author}</strong>
+                  <div class="text-muted text-xs">${post.time}</div>
+                </div>
+              </div>
+              <button class="btn btn-outline btn-xs" onclick='window.app.openShareCardModal(${JSON.stringify(post).replace(/'/g, "&#39;")})'>
+                <i class="fa-solid fa-camera"></i> Card
+              </button>
+            </div>
+
+            <div style="margin-bottom:14px">
+              <h3 style="font-size:1.1rem;color:var(--color-white);margin-bottom:6px">${post.workoutTitle}</h3>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:0.82rem">
+                <span class="badge badge-primary"><i class="fa-solid fa-weight-hanging"></i> ${(post.volumeKg || 0).toLocaleString()} kg volume</span>
+                <span class="badge" style="background:rgba(255,255,255,0.05);color:var(--color-white)"><i class="fa-solid fa-layer-group"></i> ${post.setsCount || 0} sets</span>
+                <span class="badge" style="background:rgba(255,255,255,0.05);color:var(--color-white)"><i class="fa-solid fa-stopwatch"></i> ${post.durationMins || 0} mins</span>
+              </div>
+            </div>
+
+            ${post.prs && post.prs.length ? `
+              <div style="background:rgba(245,158,11,0.12);border:1px solid #f59e0b;padding:8px 12px;border-radius:var(--radius-sm);margin-bottom:12px;font-size:0.82rem;color:#f59e0b;display:flex;align-items:center;gap:8px">
+                <i class="fa-solid fa-fire"></i> <strong>PR Milestone:</strong> ${post.prs.join(', ')}
+              </div>
+            ` : ''}
+
+            <!-- Kudos action -->
+            <div style="display:flex;align-items:center;gap:10px;padding-top:10px;border-top:1px solid var(--color-border)">
+              <button class="kudos-btn ${post.hasKudoed ? 'active' : ''}" onclick="window.app.toggleKudos('${post.id}')">
+                <i class="fa-solid fa-heart"></i> ${post.kudosCount || 0} Kudos
+              </button>
+              <span class="text-muted text-xs"><i class="fa-solid fa-comment"></i> ${(post.comments || []).length} comments</span>
+            </div>
+
+            <!-- Comments List -->
+            <div class="comment-list">
+              ${(post.comments || []).map(c => `
+                <div class="comment-item ${c.reported ? 'reported' : ''}">
+                  <div>
+                    <strong style="color:var(--color-white);font-size:0.8rem">${c.authorName}</strong>
+                    <span class="text-muted text-xs" style="margin-left:6px">${c.time}</span>
+                    <div style="color:${c.reported ? 'var(--color-muted)' : 'var(--color-white)'};margin-top:2px">
+                      ${c.reported ? '<i class="fa-solid fa-triangle-exclamation"></i> Comment hidden for review' : c.text}
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:6px">
+                    ${c.isOwn ? `
+                      <button class="btn btn-outline btn-xs" onclick="window.app.deleteComment('${post.id}', '${c.id}')" title="Delete">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    ` : ''}
+                    ${!c.reported ? `
+                      <button class="btn btn-outline btn-xs" onclick="window.app.reportComment('${post.id}', '${c.id}')" title="Report">
+                        <i class="fa-solid fa-flag"></i>
+                      </button>
+                    ` : ''}
+                  </div>
+                </div>
+              `).join('')}
+
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <input type="text" id="comment-input-${post.id}" class="input-field" placeholder="Drop encouragement or ask about sets..." style="font-size:0.82rem;padding:8px 12px" onkeydown="if(event.key==='Enter')window.app.postComment('${post.id}')" />
+                <button class="btn btn-primary btn-sm" onclick="window.app.postComment('${post.id}')">
+                  <i class="fa-solid fa-paper-plane"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  renderCommunityBuddies(buddies) {
+    return `
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="calc-card">
+          <h3 class="calc-card-title"><i class="fa-solid fa-user-plus"></i> Connect with a Gym Buddy</h3>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <input type="text" id="new-buddy-input" class="input-field" placeholder="Enter handle e.g. @iron_warrior or athlete name" onkeydown="if(event.key==='Enter')window.app.addBuddy()" />
+            <button class="btn btn-primary" onclick="window.app.addBuddy()">
+              <i class="fa-solid fa-plus"></i> Add Buddy
+            </button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:16px">
+          ${buddies.map(b => `
+            <div class="buddy-card">
+              <div style="display:flex;align-items:center;gap:12px">
+                <div class="profile-avatar" style="width:46px;height:46px;font-size:1.1rem;margin:0">
+                  ${b.avatar || 'AB'}
+                </div>
+                <div>
+                  <strong style="color:var(--color-white);font-size:0.95rem">${b.name}</strong>
+                  <div class="text-muted text-xs">${b.handle}</div>
+                  <div style="margin-top:4px;display:flex;align-items:center;gap:6px">
+                    <span class="badge" style="background:#f59e0b22;color:#f59e0b;font-size:0.7rem">
+                      <i class="fa-solid fa-fire"></i> ${b.streakDays}d Streak
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div style="text-align:right">
+                <button class="cheer-btn ${b.isCheered ? 'cheered' : ''}" onclick="window.app.sendCheer('${b.id}')">
+                  <i class="fa-solid fa-hands-clapping"></i> ${b.cheersCount} ${b.isCheered ? 'Cheered!' : 'Cheer'}
+                </button>
+                <div class="text-muted text-xs" style="margin-top:6px;max-width:140px;line-height:1.3">
+                  ${b.lastActivity}
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  renderCommunityTeams(teams, leaderboard) {
+    return `
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="calc-card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div style="display:flex;gap:8px;flex:1;max-width:400px">
+            <input type="text" id="team-code-input" class="input-field" placeholder="Enter Team Code (e.g. FORGE-88)" onkeydown="if(event.key==='Enter')window.app.joinTeam()" />
+            <button class="btn btn-primary" onclick="window.app.joinTeam()">
+              <i class="fa-solid fa-right-to-bracket"></i> Join Squad
+            </button>
+          </div>
+          <button class="btn btn-outline" onclick="window.app.createTeamPrompt()">
+            <i class="fa-solid fa-plus"></i> Create New Team
+          </button>
+        </div>
+
+        <div class="calc-card">
+          <h3 class="calc-card-title"><i class="fa-solid fa-ranking-star"></i> Team Volume Leaderboard</h3>
+          <div style="margin-top:14px">
+            ${leaderboard.map((t, idx) => {
+      const rankClass = idx === 0 ? 'rank-gold' : idx === 1 ? 'rank-silver' : idx === 2 ? 'rank-bronze' : '';
+      return `
+                <div class="leaderboard-row">
+                  <div class="rank-badge ${rankClass}">#${idx + 1}</div>
+                  <div>
+                    <strong style="color:var(--color-white)">${t.name}</strong>
+                    <div class="text-muted text-xs">${t.description}</div>
+                  </div>
+                  <div>
+                    <span class="team-pill-badge">${t.code}</span>
+                    <div class="text-muted text-xs" style="margin-top:2px">${t.membersCount} Athletes</div>
+                  </div>
+                  <div style="text-align:right">
+                    <strong style="color:var(--color-primary);font-size:1rem">${(t.weeklyVolumeKg || 0).toLocaleString()} kg</strong>
+                    <div class="text-muted text-xs">${t.isMember ? '<span style="color:#10b981">✓ Joined</span>' : 'Weekly Vol'}</div>
+                  </div>
+                </div>
+              `;
+    }).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  setCommunityTab(tab) {
+    this.communityTab = tab;
+    this.render();
+  }
+
+  toggleKudos(postId) {
+    socialService.toggleKudos(postId);
+    audioCueService.playBeep(660, 0.08);
+    this.render();
+  }
+
+  postComment(postId) {
+    const input = document.getElementById(`comment-input-${postId}`);
+    if (!input || !input.value.trim()) return;
+    const authorName = this.currentUser ? this.currentUser.name : 'Athlete';
+    socialService.addComment(postId, authorName, input.value.trim());
+    input.value = '';
+    this.showToast('Comment posted! 💪');
+    this.render();
+  }
+
+  deleteComment(postId, commentId) {
+    socialService.deleteComment(postId, commentId);
+    this.showToast('Comment removed.');
+    this.render();
+  }
+
+  reportComment(postId, commentId) {
+    socialService.reportComment(postId, commentId);
+    this.showToast('Comment reported for moderation review.');
+    this.render();
+  }
+
+  addBuddy() {
+    const input = document.getElementById('new-buddy-input');
+    if (!input || !input.value.trim()) return;
+    const added = socialService.addBuddy(input.value.trim());
+    if (added) {
+      this.triggerConfetti();
+      this.showToast(`Connected with ${added.name} (${added.handle})! 🔥`);
+      input.value = '';
+      this.render();
+    }
+  }
+
+  sendCheer(buddyId) {
+    const cheered = socialService.sendCheer(buddyId);
+    if (cheered) {
+      audioCueService.playVictory();
+      this.triggerConfetti();
+      this.showToast(`Cheer sent to ${cheered.name}! Total cheers: ${cheered.cheersCount} 👏`);
+      this.render();
+    }
+  }
+
+  joinTeam() {
+    const input = document.getElementById('team-code-input');
+    if (!input || !input.value.trim()) return;
+    const joined = socialService.joinTeamByCode(input.value.trim());
+    if (joined) {
+      audioCueService.playVictory();
+      this.triggerConfetti();
+      this.showToast(`Welcome to squad ${joined.name}!`);
+      input.value = '';
+      this.render();
+    } else {
+      this.showToast('Invalid team code. Try FORGE-88 or SUNRISE-12');
+    }
+  }
+
+  createTeamPrompt() {
+    const name = prompt('Enter your team or gym name:');
+    if (!name || !name.trim()) return;
+    const code = prompt('Enter a short 4-8 letter team code (e.g. IRON-01):');
+    const desc = prompt('Enter a brief team bio:') || '';
+    const team = socialService.createTeam({ name, code, description: desc });
+    if (team) {
+      this.triggerConfetti();
+      this.showToast(`Squad created: ${team.name} (${team.code})!`);
+      this.render();
+    }
+  }
+
+  openShareCardModal(post = null) {
+    const latestWorkout = post || {
+      author: this.currentUser ? this.currentUser.name : 'Athlete',
+      workoutTitle: 'Full Body Hypertrophy Circuit',
+      volumeKg: 8420,
+      durationMins: 52,
+      setsCount: 16,
+      prs: ['Bench Press 85kg × 8']
+    };
+    this.activeShareCardWorkout = latestWorkout;
+    this.render();
+  }
+
+  closeShareCard() {
+    this.activeShareCardWorkout = null;
+    this.render();
+  }
+
+  downloadShareCard() {
+    const canvas = document.getElementById('share-card-canvas');
+    if (canvas) {
+      shareCardService.downloadCanvasAsPng(canvas, 'forge-fuel-workout-card.png');
+      this.showToast('Workout card downloaded! Ready for Instagram Stories 📸');
+    }
+  }
+
+  shareStory() {
+    const canvas = document.getElementById('share-card-canvas');
+    if (canvas) {
+      shareCardService.shareCard(canvas, {
+        title: 'FORGE & FUEL Workout Card',
+        text: 'Crushed my session on FORGE & FUEL Matrix!'
+      });
+      this.showToast('Sharing dialog opened!');
+    }
+  }
+
+  // ─────────────────────────── AI COACH & RECOVERY ────────────────────────────
+  renderAiCoach() {
+    const recovery = aiService.analyzeRecoveryAndSchedule({
+      workoutLogs: workoutService.getLogs(),
+      userGoal: this.currentUser ? this.currentUser.goal : 'maintenance',
+      targetDaysPerWeek: 4
+    });
+
+    return `
+      <div class="view-container animate-fade-in">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow"><span class="eyebrow-dot"></span> Sports Science Intelligence</p>
+            <h1 class="page-title">FORGE AI Assistant</h1>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" onclick="window.app.setAiTab('nlp')">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> NLP Quick Log
+            </button>
+          </div>
+        </div>
+
+        <!-- Sub Tabs -->
+        <div class="workout-tabs" style="margin-bottom:24px">
+          <button class="workout-tab-btn ${this.aiTab === 'coach' ? 'active' : ''}" onclick="window.app.setAiTab('coach')">
+            <i class="fa-solid fa-comments"></i> AI Coach Chat
+          </button>
+          <button class="workout-tab-btn ${this.aiTab === 'recovery' ? 'active' : ''}" onclick="window.app.setAiTab('recovery')">
+            <i class="fa-solid fa-heart-pulse"></i> Recovery & Fatigue
+          </button>
+          <button class="workout-tab-btn ${this.aiTab === 'nlp' ? 'active' : ''}" onclick="window.app.setAiTab('nlp')">
+            <i class="fa-solid fa-bolt"></i> Natural Language Logger
+          </button>
+        </div>
+
+        ${this.aiTab === 'coach' ? this.renderAiCoachTab() : ''}
+        ${this.aiTab === 'recovery' ? this.renderAiRecoveryTab(recovery) : ''}
+        ${this.aiTab === 'nlp' ? this.renderAiNlpTab() : ''}
+      </div>
+    `;
+  }
+
+  renderAiCoachTab() {
+    return `
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <!-- Quick Prompts Row -->
+        <div class="calc-card" style="padding:14px 18px">
+          <div style="font-size:0.8rem;font-weight:700;color:var(--color-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">
+            <i class="fa-solid fa-lightbulb"></i> Recommended Prompt Swaps & Form Questions
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-outline btn-xs" onclick="window.app.sendAiMessage('My shoulder hurts during bench press, what swap can I do?')">
+              🩹 Shoulder Pain Swap
+            </button>
+            <button class="btn btn-outline btn-xs" onclick="window.app.sendAiMessage('How do I fix knee cave during deep squats?')">
+              🦵 Squat Knee Tracking
+            </button>
+            <button class="btn btn-outline btn-xs" onclick="window.app.sendAiMessage('I cannot do a pull-up yet, what is the best progression ladder?')">
+              🧗 Pull-Up Progression
+            </button>
+            <button class="btn btn-outline btn-xs" onclick="window.app.sendAiMessage('How to speed up recovery from severe DOMS and muscle soreness?')">
+              ⚡ DOMS & Recovery
+            </button>
+            <button class="btn btn-outline btn-xs" onclick="window.app.sendAiMessage('What calorie deficit or surplus is optimal for my body composition?')">
+              🥗 Cut vs Bulk Surplus
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="calc-card" style="padding:20px;display:flex;flex-direction:column;gap:16px">
+          <div id="ai-chat-box" class="ai-chat-window" style="display:flex;flex-direction:column;gap:14px;max-height:480px;overflow-y:auto;padding-right:6px">
+            ${this.aiChatMessages.map(msg => `
+              <div class="ai-chat-bubble ${msg.sender === 'user' ? 'user-bubble' : 'coach-bubble'}">
+                <div class="ai-bubble-avatar">
+                  ${msg.sender === 'user' ? '<i class=\"fa-solid fa-user\"></i>' : '<i class=\"fa-solid fa-robot\"></i>'}
+                </div>
+                <div class="ai-bubble-content">
+                  <div class="ai-bubble-header">
+                    <strong>${msg.sender === 'user' ? (this.currentUser ? this.currentUser.name : 'Athlete') : 'FORGE AI Coach'}</strong>
+                    <span class="text-muted text-xs">${msg.time}</span>
+                  </div>
+                  <div class="ai-bubble-text" style="white-space:pre-wrap;line-height:1.6;font-size:0.88rem;margin-top:4px">
+                    ${msg.text.replace(/### (.*?)\n/g, '<h4 style=\"margin:8px 0 4px 0;color:var(--color-primary);font-size:0.95rem\">$1</h4>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- Chat Input -->
+          <div style="display:flex;gap:8px;align-items:center;border-top:1px solid var(--color-border);padding-top:14px">
+            <input type="text" id="ai-chat-input" class="input-field" placeholder="Ask about exercise mechanics, swaps, or recovery protocols..." onkeydown="window.app.handleAiInputKey(event)" style="flex:1" />
+            <button class="btn btn-primary" onclick="window.app.sendAiMessage()">
+              <i class="fa-solid fa-paper-plane"></i> Send
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="window.app.clearAiChat()" title="Clear Chat">
+              <i class="fa-solid fa-rotate-left"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Medical Disclaimer Banner -->
+        <div class="calc-card" style="background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.25);padding:14px 18px">
+          <p style="color:#ef4444;font-size:0.78rem;line-height:1.5;margin:0">
+            ${MEDICAL_DISCLAIMER}
+          </p>
+        </div>
+      </div>
+    `;
+  }
+
+  renderAiRecoveryTab(rec) {
+    const isOptimal = rec.status === 'OPTIMAL_TRAIN';
+    const isDeload = rec.status === 'DELOAD_RECOMMENDED';
+    const statusColor = isOptimal ? '#10b981' : isDeload ? '#ef4444' : '#f59e0b';
+
+    return `
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <!-- 3 Top Stats Grid -->
+        <div class="grid-3">
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-label">Systemic Fatigue Index</span>
+              <span class="metric-badge" style="background:${statusColor}20;border:1px solid ${statusColor};color:${statusColor}">${rec.status.replace(/_/g, ' ')}</span>
+            </div>
+            <div class="metric-value" style="color:${statusColor}">${rec.fatigueIndex}%</div>
+            <div class="metric-sub">${rec.weeklySessionsCount} sessions completed in past 7 days</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-label">Circadian Peak Window</span>
+              <i class="fa-solid fa-clock" style="color:var(--color-primary)"></i>
+            </div>
+            <div class="metric-value" style="font-size:1.4rem;color:var(--color-white)">${rec.optimalTimeWindow}</div>
+            <div class="metric-sub">Peak core body temp & maximal grip force</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-label">Suggested Daily Focus</span>
+              <i class="fa-solid fa-bullseye" style="color:#f59e0b"></i>
+            </div>
+            <div class="metric-value" style="font-size:1.3rem;color:#f59e0b">${rec.suggestedFocus}</div>
+            <div class="metric-sub">Least fatigued kinetic chain</div>
+          </div>
+        </div>
+
+        <!-- Muscle Readiness Model -->
+        <div class="calc-card" style="padding:22px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+            <div>
+              <h3 style="color:var(--color-white);margin-bottom:4px;font-size:1.05rem">
+                <i class="fa-solid fa-dna" style="color:var(--color-primary)"></i> Muscular Recovery & Readiness Matrix
+              </h3>
+              <p class="text-muted text-xs">Estimated based on neuromuscular volume and 48-hour localized glycogen replenishment.</p>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:16px">
+            ${Object.entries(rec.muscleReadiness).map(([muscle, score]) => {
+      const barColor = score >= 80 ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444';
+      return `
+                <div style="background:rgba(255,255,255,0.02);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:14px">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                    <strong style="color:var(--color-white);font-size:0.88rem">${muscle}</strong>
+                    <span style="color:${barColor};font-weight:800;font-size:0.85rem">${score}% Ready</span>
+                  </div>
+                  <div style="width:100%;height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden">
+                    <div style="width:${score}%;height:100%;background:${barColor};border-radius:4px;transition:width 0.4s ease"></div>
+                  </div>
+                </div>
+              `;
+    }).join('')}
+          </div>
+        </div>
+
+        <!-- Coach Action Recommendation -->
+        <div class="calc-card" style="padding:20px;border-left:4px solid ${statusColor}">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+            <i class="fa-solid fa-heart-pulse" style="color:${statusColor};font-size:1.2rem"></i>
+            <h4 style="margin:0;color:var(--color-white);font-size:0.95rem">AI Coach Readiness Recommendation</h4>
+          </div>
+          <p style="color:var(--color-muted);line-height:1.6;font-size:0.86rem;margin:0">
+            ${rec.recommendation}
+          </p>
+          <div style="margin-top:12px;font-size:0.75rem;color:var(--color-muted)">
+            <i class="fa-solid fa-circle-info"></i> ${rec.windowRationale}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  renderAiNlpTab() {
+    return `
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div class="calc-card" style="padding:22px">
+          <div style="margin-bottom:16px">
+            <h3 style="color:var(--color-white);margin-bottom:4px;font-size:1.05rem">
+              <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--color-primary)"></i> Natural Language Workout Logger
+            </h3>
+            <p class="text-muted text-xs">
+              Type or paste unstructured workout notes. Our NLP engine automatically extracts exercises, sets, reps, and weights.
+            </p>
+          </div>
+
+          <!-- Quick Samples -->
+          <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
+            <span style="font-size:0.75rem;font-weight:700;color:var(--color-muted)">TRY SAMPLE:</span>
+            <button class="btn btn-outline btn-xs" onclick="window.app.setNlpSample('push')">Push Day</button>
+            <button class="btn btn-outline btn-xs" onclick="window.app.setNlpSample('legs')">Leg Day</button>
+            <button class="btn btn-outline btn-xs" onclick="window.app.setNlpSample('back')">Back & Pull</button>
+          </div>
+
+          <!-- Textarea -->
+          <textarea id="nlp-text-input" class="input-field" rows="5" placeholder="e.g.&#10;3 sets of 10 bench at 80kg&#10;squat 100kg 5x5&#10;deadlift 140kg for 4 sets of 6 reps&#10;pullups 3 sets 10 reps bodyweight" style="width:100%;font-family:monospace;font-size:0.88rem;resize:vertical;padding:12px">${this.nlpInputText || ''}</textarea>
+
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+            <button class="btn btn-primary" onclick="window.app.parseNlpText()">
+              <i class="fa-solid fa-bolt"></i> Parse Workout
+            </button>
+          </div>
+        </div>
+
+        <!-- Parsed Results Preview -->
+        ${this.nlpParsedResults && this.nlpParsedResults.length > 0 ? `
+          <div class="calc-card animate-fade-in" style="padding:22px;border-color:var(--color-border-accent)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+              <div>
+                <h4 style="color:var(--color-white);margin:0;font-size:1rem">
+                  <i class="fa-solid fa-circle-check" style="color:#10b981"></i> Successfully Parsed ${this.nlpParsedResults.length} Exercises
+                </h4>
+                <p class="text-muted text-xs" style="margin-top:2px">
+                  Review the structured metrics below before importing to your session log.
+                </p>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="window.app.confirmNlpWorkout()">
+                <i class="fa-solid fa-plus"></i> Confirm & Log to Workout History
+              </button>
+            </div>
+
+            <div style="overflow-x:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Exercise Detected</th>
+                    <th style="text-align:center">Sets</th>
+                    <th style="text-align:center">Reps</th>
+                    <th style="text-align:center">Load (kg)</th>
+                    <th style="text-align:center">Volume</th>
+                    <th style="text-align:center">Confidence</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${this.nlpParsedResults.map(p => `
+                    <tr>
+                      <td>
+                        <strong>${p.exerciseName}</strong>
+                        <div class="text-muted text-xs">${p.rawLine}</div>
+                      </td>
+                      <td style="text-align:center"><strong>${p.sets}</strong></td>
+                      <td style="text-align:center"><strong>${p.reps}</strong></td>
+                      <td style="text-align:center">${p.isBodyweight ? 'Bodyweight' : `${p.weightKg} kg`}</td>
+                      <td style="text-align:center;color:var(--color-primary);font-weight:700">${p.volumeKg.toLocaleString()} kg</td>
+                      <td style="text-align:center">
+                        <span class="team-pill-badge" style="color:#10b981">${Math.round(p.confidence * 100)}%</span>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  setAiTab(tab) {
+    this.aiTab = tab;
+    this.render();
+  }
+
+  sendAiMessage(customText = null) {
+    const input = document.getElementById('ai-chat-input');
+    const query = customText || (input ? input.value.trim() : '');
+    if (!query) return;
+
+    if (input) input.value = '';
+
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    // 1. Add user message
+    this.aiChatMessages.push({
+      sender: 'user',
+      text: query,
+      time: timeStr
+    });
+
+    // 2. Fetch AI Coach advice
+    const coachRes = aiService.askAiCoach(query, {
+      name: this.currentUser ? this.currentUser.name : 'Athlete'
+    });
+
+    // 3. Add coach response
+    this.aiChatMessages.push({
+      sender: 'coach',
+      text: coachRes.reply,
+      time: timeStr
+    });
+
+    audioCueService.playBeep(880, 0.08);
+    this.render();
+
+    // Scroll chat to bottom
+    setTimeout(() => {
+      const box = document.getElementById('ai-chat-box');
+      if (box) box.scrollTop = box.scrollHeight;
+    }, 50);
+  }
+
+  handleAiInputKey(event) {
+    if (event.key === 'Enter') {
+      this.sendAiMessage();
+    }
+  }
+
+  clearAiChat() {
+    this.aiChatMessages = [
+      { sender: 'coach', text: "Chat history cleared. How can I assist your training or biomechanics today?", time: 'Just now' }
+    ];
+    this.render();
+  }
+
+  setNlpSample(type) {
+    const samples = {
+      push: "3 sets of 10 bench at 80kg\nincline db press 4 sets 12 reps 28kg\ntricep pushdown 3 sets 15 reps 35kg",
+      legs: "squat 100kg 5x5\nromanian deadlift 4 sets 8 reps 90kg\nleg raises 3 sets 15 reps bodyweight",
+      back: "deadlift 140kg for 4 sets of 6 reps\npullups 3 sets 10 reps bodyweight\nbarbell row 4 sets 10 reps 70kg"
+    };
+    this.nlpInputText = samples[type] || '';
+    const textarea = document.getElementById('nlp-text-input');
+    if (textarea) textarea.value = this.nlpInputText;
+    this.parseNlpText();
+  }
+
+  parseNlpText() {
+    const textarea = document.getElementById('nlp-text-input');
+    const text = textarea ? textarea.value.trim() : this.nlpInputText;
+    if (!text) {
+      this.showToast('Please enter some workout text to parse!');
+      return;
+    }
+    this.nlpInputText = text;
+    const result = aiService.parseWorkoutInput(text);
+    if (!result.success || result.parsed.length === 0) {
+      this.showToast('Could not parse any exercise lines. Check format!');
+      return;
+    }
+    this.nlpParsedResults = result.parsed;
+    audioCueService.playBeep(660, 0.09);
+    this.showToast(`Parsed ${result.parsed.length} exercises from notes! ✨`);
+    this.render();
+  }
+
+  confirmNlpWorkout() {
+    if (!this.nlpParsedResults || this.nlpParsedResults.length === 0) return;
+
+    for (const item of this.nlpParsedResults) {
+      for (let s = 1; s <= item.sets; s++) {
+        this.loggedSets.push({
+          id: Date.now() + Math.random(),
+          exerciseId: item.exerciseId,
+          weight: item.weightKg,
+          reps: item.reps,
+          date: new Date().toDateString()
+        });
+        workoutService.checkAndRecordPR(item.exerciseId, item.weightKg, item.reps);
+      }
+    }
+
+    this.ss('ff_sets', this.loggedSets);
+    audioCueService.playVictory();
+    this.triggerConfetti();
+    this.showToast(`Logged ${this.nlpParsedResults.length} exercises to session history! 🔥`);
+    this.nlpParsedResults = null;
+    this.nlpInputText = '';
+    this.render();
   }
 
   // ─────────────────────────── KNOWLEDGE & MOTIVATION ─────────────────────────
@@ -2135,9 +2983,9 @@ class ForgeFuelApp {
                 <div class="input-group">
                   <label class="input-label">Fitness Goal</label>
                   <select name="goal" class="input-field">
-                    <option value="cut" ${u.goal==='cut'?'selected':''}>Fat Loss (Cut)</option>
-                    <option value="bulk" ${u.goal==='bulk'?'selected':''}>Lean Muscle Bulk</option>
-                    <option value="recomp" ${u.goal==='recomp'?'selected':''}>Body Recomposition</option>
+                    <option value="cut" ${u.goal === 'cut' ? 'selected' : ''}>Fat Loss (Cut)</option>
+                    <option value="bulk" ${u.goal === 'bulk' ? 'selected' : ''}>Lean Muscle Bulk</option>
+                    <option value="recomp" ${u.goal === 'recomp' ? 'selected' : ''}>Body Recomposition</option>
                   </select>
                 </div>
               </div>
@@ -2159,6 +3007,109 @@ class ForgeFuelApp {
             </div>
           </div>
         </div>
+
+        <!-- ─── Health & Wearables Hub ─────────────────────────────── -->
+        <div class="calc-card" style="margin-top:20px;padding:22px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+            <div>
+              <h3 style="color:var(--color-white);margin-bottom:4px;font-size:1.05rem">
+                <i class="fa-solid fa-heart-pulse" style="color:#ef4444"></i> Health & Wearables Integration Hub
+              </h3>
+              <p class="text-muted text-xs">Biometric sync engine for Apple Watch, Garmin, Pixel Watch & Fitbit.</p>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              ${WEARABLE_PROVIDERS.map(p => `
+                <button class="btn btn-outline btn-xs" onclick="window.app.syncWearable('${p.id}')">
+                  <i class="fa-solid ${p.icon}" style="color:${p.color}"></i> Sync ${p.name.split(' ')[0]}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Wearable Metrics 4-grid -->
+          ${(() => {
+        const wm = integrationsService.getWearableMetrics();
+        return `
+              <div class="grid-4" style="gap:12px">
+                <div style="background:rgba(255,255,255,0.02);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:14px">
+                  <div class="text-muted text-xs">ACTIVE BURN</div>
+                  <div style="font-size:1.4rem;font-weight:800;color:#ef4444;margin:4px 0">${wm.activeCaloriesBurned} <small style="font-size:0.75rem;color:var(--color-muted)">kcal</small></div>
+                  <div class="text-muted text-xs"><i class="fa-solid fa-fire"></i> Caloric Expenditure</div>
+                </div>
+
+                <div style="background:rgba(255,255,255,0.02);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:14px">
+                  <div class="text-muted text-xs">RESTING HR</div>
+                  <div style="font-size:1.4rem;font-weight:800;color:var(--color-primary);margin:4px 0">${wm.restingHeartRateBpm} <small style="font-size:0.75rem;color:var(--color-muted)">bpm</small></div>
+                  <div class="text-muted text-xs"><i class="fa-solid fa-heart"></i> Cardiovascular Baseline</div>
+                </div>
+
+                <div style="background:rgba(255,255,255,0.02);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:14px">
+                  <div class="text-muted text-xs">DAILY STEPS</div>
+                  <div style="font-size:1.4rem;font-weight:800;color:#10b981;margin:4px 0">${wm.dailySteps.toLocaleString()}</div>
+                  <div class="text-muted text-xs"><i class="fa-solid fa-person-walking"></i> Baseline Non-Exercise Activity</div>
+                </div>
+
+                <div style="background:rgba(255,255,255,0.02);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:14px">
+                  <div class="text-muted text-xs">SLEEP RECOVERY</div>
+                  <div style="font-size:1.4rem;font-weight:800;color:#f59e0b;margin:4px 0">${wm.sleepHours}h <small style="font-size:0.75rem;color:#10b981">(${wm.sleepQualityScore}%)</small></div>
+                  <div class="text-muted text-xs"><i class="fa-solid fa-moon"></i> Parasympathetic Rest</div>
+                </div>
+              </div>
+            `;
+      })()}
+        </div>
+
+        <!-- ─── Data Portability & Exports ─────────────────────────── -->
+        <div class="calc-card" style="margin-top:20px;padding:22px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+            <div>
+              <h3 style="color:var(--color-white);margin-bottom:4px;font-size:1.05rem">
+                <i class="fa-solid fa-file-export" style="color:var(--color-primary)"></i> Data Portability & Exports
+              </h3>
+              <p class="text-muted text-xs">Export your training records, nutrition logs, and calendar schedules anytime. No lock-in.</p>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-primary btn-sm" onclick="window.app.exportWorkoutsCsv()">
+                <i class="fa-solid fa-file-csv"></i> Workouts CSV
+              </button>
+              <button class="btn btn-primary btn-sm" onclick="window.app.exportNutritionCsv()">
+                <i class="fa-solid fa-file-csv"></i> Nutrition CSV
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="window.app.exportCalendarIcs()">
+                <i class="fa-solid fa-calendar-days"></i> .ICS Calendar
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="window.print()">
+                <i class="fa-solid fa-print"></i> Print / PDF
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── Spotify Audio Beats Matcher ────────────────────────── -->
+        <div class="calc-card" style="margin-top:20px;padding:22px">
+          <div style="margin-bottom:16px">
+            <h3 style="color:var(--color-white);margin-bottom:4px;font-size:1.05rem">
+              <i class="fa-brands fa-spotify" style="color:#1db954"></i> Spotify BPM Workout Matcher
+            </h3>
+            <p class="text-muted text-xs">Acoustically calibrated training playlists matched to session intensity.</p>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:14px">
+            ${SPOTIFY_PLAYLISTS.map(p => `
+              <div style="background:rgba(255,255,255,0.02);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:14px;display:flex;flex-direction:column;justify-content:space-between;gap:10px">
+                <div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                    <strong style="color:var(--color-white);font-size:0.88rem">${p.title}</strong>
+                    <span class="team-pill-badge" style="color:#1db954">${p.bpmRange}</span>
+                  </div>
+                  <p class="text-muted text-xs" style="margin:0;line-height:1.4">${p.description}</p>
+                </div>
+                <a href="${p.webUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-xs" style="text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px">
+                  <i class="fa-brands fa-spotify" style="color:#1db954"></i> Launch on Spotify
+                </a>
+              </div>
+            `).join('')}
+          </div>
+        </div>
       </div>
     `;
   }
@@ -2168,17 +3119,51 @@ class ForgeFuelApp {
     const fd = new FormData(e.target);
     const updated = {
       ...this.currentUser,
-      name:   fd.get('name')?.trim() || this.currentUser.name,
+      name: fd.get('name')?.trim() || this.currentUser.name,
       weight: parseFloat(fd.get('weight')) || this.currentUser.weight,
       height: parseInt(fd.get('height')) || this.currentUser.height,
-      age:    parseInt(fd.get('age')) || this.currentUser.age,
-      goal:   fd.get('goal') || this.currentUser.goal
+      age: parseInt(fd.get('age')) || this.currentUser.age,
+      goal: fd.get('goal') || this.currentUser.goal
     };
     this.currentUser = updated;
     this.accounts = this.accounts.map(a => a.email === updated.email ? updated : a);
     this.ss('ff_current_user', updated);
     this.ss('ff_accounts', this.accounts);
     this.showToast('Profile updated!');
+    this.render();
+  }
+
+  // ─── Phase 5: Export & Wearables Handlers ───────────────────────
+  exportWorkoutsCsv() {
+    const logs = workoutService.getLogs();
+    const csv = exportService.generateWorkoutsCsv(logs);
+    exportService.downloadFile('forge-fuel-workouts.csv', csv, 'text/csv');
+    this.showToast('Workout history exported to CSV! 📁');
+  }
+
+  exportNutritionCsv() {
+    const csv = exportService.generateNutritionCsv(this.loggedMeals);
+    exportService.downloadFile('forge-fuel-nutrition.csv', csv, 'text/csv');
+    this.showToast('Nutrition logs exported to CSV! 🥗');
+  }
+
+  exportCalendarIcs() {
+    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    tomorrow.setHours(17, 0, 0, 0); // 5:00 PM circadian window
+    const ics = exportService.generateIcsContent({
+      title: 'FORGE & FUEL Hypertrophy Session',
+      description: 'Scheduled resistance training session on FORGE & FUEL Matrix',
+      startDate: tomorrow,
+      durationMinutes: 60
+    });
+    exportService.downloadFile('forge-fuel-workout.ics', ics, 'text/calendar');
+    this.showToast('Workout scheduled in .ICS Calendar! 📅');
+  }
+
+  syncWearable(providerId) {
+    const fresh = integrationsService.syncWearable(providerId);
+    audioCueService.playBeep(780, 0.08);
+    this.showToast(`Biometrics synced from ${fresh.provider}! Active burn: ${fresh.activeCaloriesBurned} kcal ⌚`);
     this.render();
   }
 
@@ -2242,6 +3227,36 @@ class ForgeFuelApp {
       `;
     }
 
+    if (this.activeShareCardWorkout) {
+      const sw = this.activeShareCardWorkout;
+      html += `
+        <div class="modal-backdrop" onclick="if(event.target===this)window.app.closeShareCard()">
+          <div class="modal-content" style="max-width:440px;text-align:center">
+            <div class="modal-header">
+              <div>
+                <span class="badge badge-primary">STORY & POST EXPORT</span>
+                <h2 class="modal-title" style="margin-top:4px">Workout Share Card</h2>
+                <p class="text-muted text-xs">${sw.workoutTitle || 'Alpha Session'}</p>
+              </div>
+              <button class="modal-close-btn" onclick="window.app.closeShareCard()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div style="padding:12px 0">
+              <canvas id="share-card-canvas" width="800" height="1000" class="share-canvas-preview"></canvas>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap">
+              <button class="btn btn-primary btn-sm" onclick="window.app.downloadShareCard()">
+                <i class="fa-solid fa-download"></i> Save PNG
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="window.app.shareStory()">
+                <i class="fa-solid fa-share-nodes"></i> Share Story
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="window.app.closeShareCard()">Close</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     return html;
   }
 
@@ -2267,12 +3282,12 @@ class ForgeFuelApp {
               <h4 class="footer-col-title">Core Tools</h4>
               <ul class="footer-links">
                 ${[
-                  ['workouts','Workout Circuits'],
-                  ['tracker','Macro & Water Tracker'],
-                  ['calculators','BMI, BMR & TDEE'],
-                  ['planner','Weekly Meal Planner'],
-                  ['knowledge','Fitness Science']
-                ].map(([r,l]) => `
+        ['workouts', 'Workout Circuits'],
+        ['tracker', 'Macro & Water Tracker'],
+        ['calculators', 'BMI, BMR & TDEE'],
+        ['planner', 'Weekly Meal Planner'],
+        ['knowledge', 'Fitness Science']
+      ].map(([r, l]) => `
                   <li class="footer-link-item"><button onclick="window.app.go('${r}')"><i class="fa-solid fa-chevron-right text-xs"></i> ${l}</button></li>
                 `).join('')}
               </ul>
@@ -2292,23 +3307,86 @@ class ForgeFuelApp {
   renderAuth() {
     const isLogin = this.authMode === 'login';
     return `
-      <div class="auth-page">
-        <div class="auth-card">
-          <div class="auth-brand-side">
-            <div class="brand-badge"><span class="badge-dot"></span> FORGE & FUEL MATRIX</div>
-            <h1 class="brand-hero-title">DISCIPLINE OVER<br><span>MOTIVATION.</span></h1>
-            <p class="brand-hero-sub">The all-in-one matrix for progressive overload, macro tracking, and unbreakable habits.</p>
-          </div>
+      <div class="auth-page animate-fade-in">
+        <div class="auth-bg-glow"></div>
 
-          <div class="auth-form-side">
+        <!-- Left Brand Showcase Panel -->
+        <div class="auth-brand-panel">
+          <div class="auth-brand-inner">
+            <div class="brand-logo-lg">
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+            <h1 class="auth-brand-title">FORGE<span>&FUEL</span> MATRIX</h1>
+            <p class="auth-brand-sub">
+              Advanced sports science cockpit combining Mifflin-St Jeor metabolic computation, 2D kinematic exercise tracking, and natural-language workout intelligence.
+            </p>
+
+            <div class="auth-stats-row">
+              <div class="auth-stat-item">
+                <span class="auth-stat-num">100%</span>
+                <span class="auth-stat-label">Evidence-Based</span>
+              </div>
+              <div class="auth-stat-item">
+                <span class="auth-stat-num">40+</span>
+                <span class="auth-stat-label">Core Lifts</span>
+              </div>
+              <div class="auth-stat-item">
+                <span class="auth-stat-num">0 ms</span>
+                <span class="auth-stat-label">Local-First Latency</span>
+              </div>
+            </div>
+
+            <div class="auth-features">
+              <div class="auth-feature-item">
+                <i class="fa-solid fa-chart-line"></i>
+                <span>Automated PR Detection & Epley 1RM Calculations</span>
+              </div>
+              <div class="auth-feature-item">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>AI Biomechanics Coach & Regex NLP Workout Logger</span>
+              </div>
+              <div class="auth-feature-item">
+                <i class="fa-solid fa-clock"></i>
+                <span>Guided Fullscreen Gym Mode with Audio Interval Cues</span>
+              </div>
+              <div class="auth-feature-item">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>100% Private, Zero Cloud Vendor Lock-In (LocalStorage)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Form Panel -->
+        <div class="auth-form-panel">
+          <div class="auth-form-inner">
+            <!-- Auth Tab Group -->
+            <div class="auth-tab-group">
+              <button class="auth-tab ${isLogin ? 'active' : ''}" onclick="window.app.showAuth('login')">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
+              </button>
+              <button class="auth-tab ${!isLogin ? 'active' : ''}" onclick="window.app.showAuth('register')">
+                <i class="fa-solid fa-user-plus"></i> Create Account
+              </button>
+            </div>
+
             <div class="auth-form-header">
-              <h2 class="auth-form-title">${isLogin ? 'Sign In to Matrix' : 'Create Account'}</h2>
-              <p class="auth-form-sub">${isLogin ? 'Enter your credentials to continue' : 'Step 1 of 2 — Account Credentials'}</p>
+              <h2 class="auth-form-title">${isLogin ? 'Welcome Back, Athlete' : 'Create Athlete Profile'}</h2>
+              <p class="auth-form-sub">
+                ${isLogin ? 'Enter your credentials to access your workout cockpit & analytics.' : (this.authStep === 1 ? 'Step 1 of 2 — Account Credentials' : 'Step 2 of 2 — Biometrics & Fitness Goals')}
+              </p>
+              ${!isLogin ? `
+                <div class="auth-steps">
+                  <div class="auth-step ${this.authStep >= 1 ? 'active' : ''}"></div>
+                  <div class="auth-step ${this.authStep === 2 ? 'active' : ''}"></div>
+                </div>
+              ` : ''}
             </div>
 
             ${this.authError ? `
-              <div class="auth-error-banner" style="background:rgba(239,68,68,0.15);border:1px solid #ef4444;color:#ef4444;padding:10px 14px;border-radius:8px;font-size:0.85rem;margin-bottom:16px">
-                <i class="fa-solid fa-circle-exclamation"></i> ${this.authError}
+              <div class="auth-error">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>${this.authError}</span>
               </div>
             ` : ''}
 
@@ -2324,20 +3402,29 @@ class ForgeFuelApp {
       <form class="auth-form" onsubmit="window.app.handleLogin(event)">
         <div class="input-group">
           <label class="input-label"><i class="fa-solid fa-envelope"></i> Email Address</label>
-          <input type="email" name="email" class="input-field" placeholder="you@example.com" required autocomplete="email" />
+          <input type="email" name="email" class="input-field" placeholder="athlete@forgefuel.app" required autocomplete="email" />
         </div>
         <div class="input-group">
           <label class="input-label"><i class="fa-solid fa-lock"></i> Password</label>
-          <input type="password" name="password" class="input-field" placeholder="Enter password" required />
+          <div class="input-password-wrapper">
+            <input type="password" id="login-pwd" name="password" class="input-field" placeholder="Enter password" required autocomplete="current-password" />
+            <button type="button" class="input-pwd-toggle" onclick="window.app.togglePasswordVisibility('login-pwd')" title="Toggle Password">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
         </div>
-        <button type="submit" class="btn btn-primary w-full" style="margin-top:8px">
-          <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
+
+        <button type="submit" class="btn btn-primary w-full" style="margin-top:10px;padding:12px;font-size:0.95rem">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In to Cockpit
         </button>
-        <button type="button" class="btn btn-outline w-full" onclick="window.app.demoLogin()" style="margin-top:8px">
-          <i class="fa-solid fa-bolt"></i> Try Demo Account
+
+        <div class="auth-divider">OR INSTANT ACCESS</div>
+
+        <button type="button" class="btn btn-outline w-full" onclick="window.app.demoLogin()" style="padding:11px;font-size:0.9rem">
+          <i class="fa-solid fa-bolt" style="color:var(--color-primary)"></i> Explore as Demo Athlete (1-Click)
         </button>
       </form>
-      <p class="auth-switch-text">New athlete? <button onclick="window.app.showAuth('register')">Create an account</button></p>
+      <p class="auth-switch-text">New to the platform? <button onclick="window.app.showAuth('register')">Create an account</button></p>
     `;
   }
 
@@ -2346,25 +3433,28 @@ class ForgeFuelApp {
       <form class="auth-form" onsubmit="window.app.handleRegisterStep1(event)">
         <div class="input-group">
           <label class="input-label"><i class="fa-solid fa-user"></i> Full Name</label>
-          <input type="text" name="name" class="input-field" placeholder="John Doe" required />
+          <input type="text" name="name" class="input-field" placeholder="Marcus Vance" required />
         </div>
         <div class="input-group">
           <label class="input-label"><i class="fa-solid fa-envelope"></i> Email Address</label>
-          <input type="email" name="email" class="input-field" placeholder="you@example.com" required />
+          <input type="email" name="email" class="input-field" placeholder="athlete@example.com" required autocomplete="email" />
         </div>
-        <div class="input-group">
-          <label class="input-label"><i class="fa-solid fa-lock"></i> Password</label>
-          <input type="password" name="password" class="input-field" placeholder="Min. 6 chars" required />
+        <div class="reg-grid-2">
+          <div class="input-group">
+            <label class="input-label"><i class="fa-solid fa-lock"></i> Password</label>
+            <input type="password" name="password" class="input-field" placeholder="Min 6 chars" required autocomplete="new-password" />
+          </div>
+          <div class="input-group">
+            <label class="input-label"><i class="fa-solid fa-lock"></i> Confirm</label>
+            <input type="password" name="confirm" class="input-field" placeholder="Re-enter password" required autocomplete="new-password" />
+          </div>
         </div>
-        <div class="input-group">
-          <label class="input-label"><i class="fa-solid fa-lock"></i> Confirm Password</label>
-          <input type="password" name="confirm" class="input-field" placeholder="Confirm password" required />
-        </div>
-        <button type="submit" class="btn btn-primary w-full" style="margin-top:8px">
-          Continue <i class="fa-solid fa-arrow-right"></i>
+
+        <button type="submit" class="btn btn-primary w-full" style="margin-top:10px;padding:12px">
+          Continue to Biometrics <i class="fa-solid fa-arrow-right"></i>
         </button>
       </form>
-      <p class="auth-switch-text">Already have an account? <button onclick="window.app.showAuth('login')">Sign in</button></p>
+      <p class="auth-switch-text">Already registered? <button onclick="window.app.showAuth('login')">Sign in</button></p>
     `;
   }
 
@@ -2373,43 +3463,82 @@ class ForgeFuelApp {
       <form class="auth-form" onsubmit="window.app.handleRegisterStep2(event)">
         <div class="reg-grid-2">
           <div class="input-group">
-            <label class="input-label">Age</label>
-            <input type="number" name="age" class="input-field" value="25" />
+            <label class="input-label">Age (years)</label>
+            <input type="number" name="age" class="input-field" value="24" min="14" max="100" required />
           </div>
           <div class="input-group">
-            <label class="input-label">Gender</label>
+            <label class="input-label">Biological Sex</label>
             <select name="gender" class="input-field">
-              <option value="male">Male</option>
-              <option value="female">Female</option>
+              <option value="male">Male (Mifflin +5 kcal)</option>
+              <option value="female">Female (Mifflin -161 kcal)</option>
             </select>
           </div>
         </div>
+
         <div class="reg-grid-2">
           <div class="input-group">
             <label class="input-label">Height (cm)</label>
-            <input type="number" name="height" class="input-field" value="175" />
+            <input type="number" name="height" class="input-field" value="178" min="100" max="250" required />
           </div>
           <div class="input-group">
             <label class="input-label">Weight (kg)</label>
-            <input type="number" name="weight" class="input-field" value="75" />
+            <input type="number" name="weight" class="input-field" value="76" min="30" max="300" step="0.5" required />
           </div>
         </div>
+
         <div class="input-group">
-          <label class="input-label">Fitness Goal</label>
-          <select name="goal" class="input-field">
-            <option value="cut">Fat Loss Cut</option>
-            <option value="maintenance">Maintenance</option>
-            <option value="bulk">Lean Muscle Bulk</option>
-          </select>
+          <label class="input-label">Primary Fitness Goal</label>
+          <div class="goal-select-group">
+            <label class="goal-option">
+              <input type="radio" name="goal" value="cut" />
+              <span>
+                <i class="fa-solid fa-fire"></i>
+                <strong>Fat Loss</strong>
+                <small>-20% Deficit</small>
+              </span>
+            </label>
+            <label class="goal-option">
+              <input type="radio" name="goal" value="maintenance" checked />
+              <span>
+                <i class="fa-solid fa-scale-balanced"></i>
+                <strong>Maintenance</strong>
+                <small>Equilibrium</small>
+              </span>
+            </label>
+            <label class="goal-option">
+              <input type="radio" name="goal" value="bulk" />
+              <span>
+                <i class="fa-solid fa-dumbbell"></i>
+                <strong>Muscle Bulk</strong>
+                <small>+15% Surplus</small>
+              </span>
+            </label>
+          </div>
         </div>
-        <button type="submit" class="btn btn-primary w-full" style="margin-top:8px">
-          <i class="fa-solid fa-rocket"></i> Complete Registration
-        </button>
+
+        <div class="reg-btns">
+          <button type="button" class="btn btn-outline" onclick="window.app.authStep = 1; window.app.render();">
+            <i class="fa-solid fa-arrow-left"></i> Back
+          </button>
+          <button type="submit" class="btn btn-primary" style="flex:1">
+            <i class="fa-solid fa-rocket"></i> Complete Setup & Launch
+          </button>
+        </div>
       </form>
     `;
   }
 
-  // ─────────────────────────── POST RENDER ─────────────────────────────────────
+  togglePasswordVisibility(id) {
+    const input = document.getElementById(id);
+    if (input) {
+      input.type = input.type === 'password' ? 'text' : 'password';
+      const icon = input.parentElement.querySelector('.input-pwd-toggle i');
+      if (icon) {
+        icon.className = input.type === 'password' ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
+      }
+    }
+  }
+
   postRender() {
     if (this.activeExerciseModal) {
       const canvas = document.getElementById('exercise-canvas');
@@ -2422,6 +3551,24 @@ class ForgeFuelApp {
           this.canvasFrame = requestAnimationFrame(tick);
         };
         tick();
+      }
+    }
+
+    if (this.activeShareCardWorkout) {
+      const shareCanvas = document.getElementById('share-card-canvas');
+      if (shareCanvas) {
+        const t = THEMES.find(x => x.id === this.activeTheme) || THEMES[0];
+        const w = this.activeShareCardWorkout;
+        shareCardService.drawWorkoutCard(shareCanvas, {
+          athleteName: w.author || (this.currentUser ? this.currentUser.name : 'Athlete'),
+          workoutTitle: w.workoutTitle || 'Full Body Hypertrophy Matrix',
+          totalVolumeKg: w.volumeKg || 8420,
+          durationMins: w.durationMins || 52,
+          setsCount: w.setsCount || 16,
+          consistencyScore: 92,
+          prText: (w.prs && w.prs[0]) || 'Consistency Milestone Crushed 🔥',
+          themeColor: t.color || '#00f2fe'
+        });
       }
     }
   }

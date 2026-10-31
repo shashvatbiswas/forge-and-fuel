@@ -2,6 +2,75 @@
 
 All notable changes to the **FORGE & FUEL Matrix** platform are documented here.
 
+## [Phase 5: Integrations & Data Portability] - 2026-10-30
+
+### ⌚ Health & Wearables Hub
+- **Multi-Device Biometric Sync** (`src/services/integrationsService.js`):
+  - Integration interface for Apple HealthKit, Google Fit / Health Connect, Garmin Connect, and Fitbit / Pixel Watch.
+  - Live synchronization of resting heart rate, active calories burned, daily steps, and parasympathetic sleep quality scores.
+
+### 🎵 Spotify BPM Workout Matcher
+- **Acoustic Intensity Calibration**:
+  - Dynamically matches audio playlists to training style:
+    - *Iron Phonk & Industrial Drive* (145–165 BPM) for Heavy Strength & 1RM attempts.
+    - *Cyberpunk Electro Sprint* (160–175 BPM) for High-Intensity Interval Training (HIIT).
+    - *Deep House & Synthwave Pump* (124–130 BPM) for Hypertrophy & Mind-Muscle connection.
+    - *Mindful Lo-Fi & Parasympathetic Rest* (70–90 BPM) for Active Recovery & Mobility.
+
+### 📅 Calendar Sync & Data Portability
+- **RFC 5545 iCalendar (`.ics`) Generator** (`src/services/exportService.js`):
+  - 1-click workout scheduling export compatible with Apple Calendar, Outlook, and Google Calendar.
+  - Direct Google Calendar template link generator.
+- **Complete Data Portability**:
+  - Unrestricted CSV export for complete workout history (date, title, volume, duration, PRs) and nutrition logs (macros, calories, meal slots).
+  - Clean browser print stylesheet for PDF report cards.
+
+---
+
+## [Phase 4: AI Features] - 2026-10-30
+
+### 🤖 AI Coach & Biomechanics Assistant
+- **Evidence-Based Knowledge Engine** (`src/services/aiService.js`):
+  - Intelligent conversational assistant providing joint-friendly regressions, movement biomechanics (bench elbow tuck, squat knee tracking, pull-up progression), and nutrition advice.
+  - Strict medical safety disclaimer embedded on every consultation.
+  - Quick-prompt suggestions for instant answers on common lifting plateaus and form breakdowns.
+
+### ⚡ Natural-Language Workout Logging
+- **Regex-Powered NLP Parser**:
+  - Parses freeform text inputs (e.g., *"3 sets of 10 bench at 80kg"*, *"squat 100kg 5x5"*, *"deadlift 140kg for 4 sets of 6 reps"*, *"pullups 3 sets 10 reps bodyweight"*).
+  - Handles multi-line session notes, extracts exercise names, sets, reps, weight (kg or lbs), and computes total volume.
+  - Interactive confirmation table with 1-click import into workout session history and automatic PR detection.
+
+### 🔋 Smart Habits & Recovery Advisor
+- **Systemic Fatigue Index & Readiness**:
+  - Heuristic fatigue calculation comparing weekly volume trends to baseline capacity.
+  - 6-muscle group readiness model (Chest, Back, Legs, Shoulders, Arms, Core) tracking 48-hour recovery windows.
+  - Circadian optimal training window recommendation (`4:00 PM – 7:00 PM`) grounded in chronobiology and peak muscular contractility.
+
+---
+
+## [Phase 3: Social and Community] - 2026-10-30
+
+### 📸 Workout Share Cards
+- **Canvas-Based Story & Post Generator** (`src/services/shareCardService.js`):
+  - Renders 800x1000 4:5 high-resolution export cards optimized for Instagram Stories and social platforms.
+  - Dynamically draws athlete name, session date, total volume lifted (kg), active time, sets completed, consistency score, and PR highlights.
+  - One-click native Web Share API integration with automatic fallback to high-quality PNG download.
+
+### 👥 Athlete Network & Squads
+- **Community Feed & Moderation** (`src/services/socialService.js`):
+  - Live activity feed showing completed workouts, PRs, sets, and volumes.
+  - Kudos reaction system with audio feedback cues.
+  - Community comment threads with instant self-deletion and report moderation controls.
+- **Buddy System & Motivational Cheers**:
+  - Add workout partners via `@handle` or name.
+  - Real-time cheers counter with synthesized audio fanfare and milestone tracking.
+- **Teams & Volume Leaderboards**:
+  - Squad creation and team join codes (e.g., `FORGE-88`, `SUNRISE-12`).
+  - Weekly collective volume (kg) leaderboard ranking with Gold, Silver, and Bronze tier badges.
+
+---
+
 ## [Phase 2: Insights and Engagement] - 2026-10-30
 
 ### 📊 Weekly Summary & Consistency Score

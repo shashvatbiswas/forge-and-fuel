@@ -55,11 +55,11 @@ src/
 
 ## Global Requirements Checklist
 - [x] **Mobile-first & Responsive**: Fluid touch targets (min 44px), sticky bottom navigation for mobile, collapsible drawers.
-- [ ] **Gym Mode**: Dedicated high-contrast, large-button workout tracking interface designed for quick taps while resting or lifting.
-- [ ] **PWA Capabilities**: Web App Manifest (`manifest.json`), service worker (`sw.js`) for asset caching, offline active workout logging, and automatic background sync upon reconnection.
-- [ ] **Accessibility & UX**: ARIA attributes, semantic landmarks, high contrast ratios across all 6 themes, keyboard navigability, clear empty/loading/error states.
-- [ ] **Environment Configuration**: `.env.example` documenting all mockable external APIs (Open Food Facts, USDA, Resend/SMTP, AI LLM endpoints, Spotify, Wearables).
-- [ ] **Test Coverage**: Automated tests for calculators, consistency score formula, PR detection engine, and natural-language workout parsing.
+- [x] **Gym Mode**: Dedicated high-contrast, large-button workout tracking interface designed for quick taps while resting or lifting.
+- [x] **PWA Capabilities**: Web App Manifest (`manifest.json`), service worker (`sw.js`) for asset caching, offline active workout logging, and automatic background sync upon reconnection.
+- [x] **Accessibility & UX**: ARIA attributes, semantic landmarks, high contrast ratios across all 6 themes, keyboard navigability, clear empty/loading/error states.
+- [x] **Environment Configuration**: `.env.example` documenting all mockable external APIs (Open Food Facts, USDA, Resend/SMTP, AI LLM endpoints, Spotify, Wearables).
+- [x] **Test Coverage**: Automated tests for calculators, consistency score formula, PR detection engine, natural-language workout parsing, social, and exports (40 tests across 10 suites passing).
 
 ---
 
